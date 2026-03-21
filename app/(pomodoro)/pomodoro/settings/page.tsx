@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { SettingsForm } from "@/app/pomodoro/settings/_components/settings-form";
+import { requireAuthSession } from "@/lib/auth/session";
 import { getDictionary } from "@/lib/i18n/messages";
 import { getRequestPreferences } from "@/lib/preferences/server";
 import { createDefaultPomodoroSettings } from "@/lib/pomodoro-settings";
@@ -12,13 +13,14 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
+  const session = await requireAuthSession();
   const { locale } = await getRequestPreferences();
   const dictionary = getDictionary(locale);
   let settingsWarning: string | null = null;
   let settings = createDefaultPomodoroSettings();
 
   try {
-    settings = await getPomodoroSettings();
+    settings = await getPomodoroSettings(session.supabase, session.user.id);
   } catch (error) {
     console.error("Failed to load pomodoro settings", error);
     settingsWarning = dictionary.settingsPage.loadWarning;

@@ -68,7 +68,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const createdSession = await createCompletedSession(parsed.data);
+    const createdSession = await createCompletedSession(
+      session.supabase,
+      session.user.id,
+      parsed.data,
+    );
     revalidatePath(DASHBOARD_PATH);
     revalidatePath(HISTORY_PATH);
 
@@ -104,7 +108,11 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const deletedId = await deleteSessionById(parsed.data.id);
+    const deletedId = await deleteSessionById(
+      session.supabase,
+      session.user.id,
+      parsed.data.id,
+    );
     revalidatePath(DASHBOARD_PATH);
     revalidatePath(HISTORY_PATH);
 
@@ -145,7 +153,12 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const updatedSession = await updateSessionTagById(parsed.data.id, parsed.data.tag);
+    const updatedSession = await updateSessionTagById(
+      session.supabase,
+      session.user.id,
+      parsed.data.id,
+      parsed.data.tag,
+    );
     revalidatePath(DASHBOARD_PATH);
     revalidatePath(HISTORY_PATH);
 

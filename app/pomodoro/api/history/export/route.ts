@@ -29,7 +29,10 @@ export async function GET(request: Request) {
   const selectedDate = normalizeSessionExportDate(url.searchParams.get("date"));
 
   try {
-    const sessions = await getCompletedSessions();
+    const sessions = await getCompletedSessions(
+      session.supabase,
+      session.user.id,
+    );
     const filteredSessions = filterSessionsForExport(sessions, {
       periodFilter,
       modeFilter,

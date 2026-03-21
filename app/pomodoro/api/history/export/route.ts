@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getAuthSession } from "@/lib/auth/session";
-import { serverEnv } from "@/lib/env";
-import { getCompletedSessions } from "@/lib/supabase/queries";
+import { getCompletedSessions, getPomodoroSettings } from "@/lib/supabase/queries";
 import {
   buildSessionExportFilename,
   buildSessionsCsv,
@@ -29,24 +28,27 @@ export async function GET(request: Request) {
   const selectedDate = normalizeSessionExportDate(url.searchParams.get("date"));
 
   try {
-    const sessions = await getCompletedSessions(
-      session.supabase,
-      session.user.id,
-    );
+    const [sessions, settings] = await Promise.all([
+      getCompletedSessions(
+        session.supabase,
+        session.user.id,
+      ),
+      getPomodoroSettings(session.supabase, session.user.id),
+    ]);
     const filteredSessions = filterSessionsForExport(sessions, {
       periodFilter,
       modeFilter,
       tagQuery,
       selectedDate,
       nowIso,
-      timeZone: serverEnv.APP_TIMEZONE,
+      timeZone: settings.timezone,
     });
     const csv = buildSessionsCsv(filteredSessions);
     const filename = buildSessionExportFilename({
       nowIso,
       periodFilter,
       selectedDate,
-      timeZone: serverEnv.APP_TIMEZONE,
+      timeZone: settings.timezone,
     });
 
     return new Response(csv, {

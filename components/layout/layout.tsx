@@ -26,11 +26,11 @@ export function AppLayout({
   const isFocusRoute = pathname === DASHBOARD_FOCUS_PATH;
 
   return (
-    <main
-      className={cn(
-        "relative isolate min-h-screen overflow-x-hidden",
-        isFocusRoute ? "px-0 pb-0 md:px-0 md:pb-0" : "px-4 pb-4 md:px-6 md:pb-6",
-      )}
+      <main
+        className={cn(
+          "relative isolate min-h-screen overflow-x-hidden",
+          isFocusRoute ? "px-0 pb-0 md:px-0 md:pb-0" : "px-3 pb-5 sm:px-4 md:px-6 md:pb-6",
+        )}
       id="main-content"
       style={{
         paddingTop: isFocusRoute
@@ -51,12 +51,12 @@ export function AppLayout({
         />
       )}
 
-      <div
-        className={cn(
-          "mx-auto w-full",
-          isFocusRoute ? "max-w-none pt-0" : "max-w-7xl pt-24 md:pt-28",
-        )}
-      >
+        <div
+          className={cn(
+            "mx-auto w-full",
+            isFocusRoute ? "max-w-none pt-0" : "max-w-7xl pt-20 sm:pt-24 md:pt-28",
+          )}
+        >
         <div className={cn("mx-auto w-full", isFocusRoute ? "max-w-none" : "max-w-5xl")}>
           {children}
         </div>

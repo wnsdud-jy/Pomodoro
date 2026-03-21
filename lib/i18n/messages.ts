@@ -176,6 +176,7 @@ export const dictionaries = {
         summaryDurationsTemplate: "집중 {focus} / 짧은 휴식 {short} / 긴 휴식 {long}",
         summaryCadenceLabel: "긴 휴식 주기",
         summaryCadenceTemplate: "집중 {count}회마다 긴 휴식",
+        summaryTimeZoneLabel: "시간대",
         summaryAutomationLabel: "자동 전환",
         summaryAutomationFull: "자동 전환 + 자동 시작 사용",
         summaryAutomationSwitchOnly: "자동 전환만 사용",
@@ -195,6 +196,11 @@ export const dictionaries = {
         longBreakEveryLabel: "긴 휴식 주기",
         longBreakEveryHelp: "기본은 집중 4회 완료마다 긴 휴식 1회입니다. 1 이상이면 원하는 주기로 조정할 수 있습니다.",
         longBreakEveryError: "긴 휴식 주기는 1 이상으로 입력해 주세요.",
+        timeZoneTitle: "시간대",
+        timeZoneDescription: "기록 묶음, 최근 세션 시간, CSV 파일 날짜 기준에 사용할 시간대를 선택합니다.",
+        timeZoneLabel: "표시 시간대",
+        timeZoneHelp: "저장 후 대시보드와 기록 화면의 시간이 선택한 시간대로 다시 계산됩니다.",
+        timeZoneError: "유효한 시간대를 선택해 주세요.",
         automationTitle: "자동 전환",
         automationDescription:
           "세션 종료 후 다음 모드로 바꿀지, 바로 시작할지 선택합니다.",
@@ -248,6 +254,8 @@ export const dictionaries = {
       warnings: {
         sessions:
           "기록을 불러오지 못했습니다. 잠시 후 다시 시도하거나 Supabase 연결을 확인해 주세요.",
+        settings:
+          "저장된 시간대를 불러오지 못해 기본 시간대 기준으로 보여주고 있습니다.",
       },
       overview: {
         title: "기록 통계",
@@ -536,6 +544,7 @@ export const dictionaries = {
         summaryDurationsTemplate: "Focus {focus} / Short {short} / Long {long}",
         summaryCadenceLabel: "Long break cadence",
         summaryCadenceTemplate: "Long break every {count} focus sessions",
+        summaryTimeZoneLabel: "Time zone",
         summaryAutomationLabel: "Automation",
         summaryAutomationFull: "Auto switch and auto start enabled",
         summaryAutomationSwitchOnly: "Auto switch only",
@@ -555,6 +564,11 @@ export const dictionaries = {
         longBreakEveryLabel: "Long break cadence",
         longBreakEveryHelp: "By default, one long break follows every 4 completed focus sessions. Use 1 or higher to adjust the cadence.",
         longBreakEveryError: "Long break cadence must be 1 or higher.",
+        timeZoneTitle: "Time zone",
+        timeZoneDescription: "Choose the time zone used for grouped history dates, recent session timestamps, and CSV export filenames.",
+        timeZoneLabel: "Display time zone",
+        timeZoneHelp: "After saving, dashboard and history times are recalculated with this time zone.",
+        timeZoneError: "Choose a valid time zone.",
         automationTitle: "Automation",
         automationDescription:
           "Choose whether the app switches to the next mode and whether it starts it immediately.",
@@ -612,6 +626,8 @@ export const dictionaries = {
       warnings: {
         sessions:
           "History could not be loaded. Try again in a moment or verify your Supabase connection.",
+        settings:
+          "The saved time zone could not be loaded, so the page is temporarily using the default time zone.",
       },
       overview: {
         title: "Overview",

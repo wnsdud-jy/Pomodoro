@@ -27,7 +27,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
+    <div className="flex flex-1 flex-col gap-5 sm:gap-6">
       {settingsWarning ? (
         <Card className="border-amber-200 bg-amber-50/90 dark:border-amber-400/30 dark:bg-amber-500/10">
           <CardContent className="space-y-2 p-5 text-sm leading-6 text-amber-900 dark:text-amber-100">
@@ -43,6 +43,7 @@ export default async function SettingsPage() {
           short_break_minutes: settings.short_break_minutes,
           long_break_minutes: settings.long_break_minutes,
           long_break_every: settings.long_break_every,
+          timezone: settings.timezone,
           auto_advance: settings.auto_advance,
           auto_start_next: settings.auto_start_next,
           sound_enabled: settings.sound_enabled,

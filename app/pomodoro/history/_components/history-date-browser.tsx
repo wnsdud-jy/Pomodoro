@@ -35,11 +35,12 @@ export function HistoryDateBrowser({
         type="date"
         value={selectedDate}
       />
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
           {description}
         </p>
         <Button
+          className="w-full sm:w-auto"
           disabled={selectedDate.length === 0}
           onClick={onClear}
           type="button"

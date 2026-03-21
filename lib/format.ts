@@ -1,6 +1,7 @@
 import type { AppLocale } from "@/lib/preferences";
+import { DEFAULT_APP_TIME_ZONE } from "@/lib/timezones";
 
-const DEFAULT_TIME_ZONE = "Asia/Seoul";
+const DEFAULT_TIME_ZONE = DEFAULT_APP_TIME_ZONE;
 const DATE_LOCALES: Record<AppLocale, string> = {
   ko: "ko-KR",
   en: "en-US",
@@ -104,9 +105,10 @@ export function formatDateKey(input: string | Date, timeZone = DEFAULT_TIME_ZONE
 
 export function formatDateKeyLabel(
   dateKey: string,
+  timeZone = DEFAULT_TIME_ZONE,
   locale: AppLocale = "ko",
 ) {
-  return formatDateLabel(getSafeDateFromKey(dateKey), DEFAULT_TIME_ZONE, locale);
+  return formatDateLabel(getSafeDateFromKey(dateKey), timeZone, locale);
 }
 
 export function formatWeekdayLabelFromIndex(

@@ -1,6 +1,6 @@
 # Pomodoro
 
-Pomodoro is a personal Pomodoro timer built with Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, and Supabase. It is designed for a single authenticated owner today, while the database layer is now user-scoped and ready for RLS-based access control.
+Pomodoro is a Pomodoro timer built with Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, and Supabase. It is designed for a single authenticated owner today, while the database layer is now user-scoped and ready for RLS-based access control.
 
 ## Overview
 
@@ -42,10 +42,11 @@ Copy `.env.example` to `.env.local` and fill in the values:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-APP_TIMEZONE=Asia/Seoul
 ```
 
 `NEXT_PUBLIC_SUPABASE_ANON_KEY` is intended for browser use. Do not use a service-role key in normal application flows.
+
+Timezone is no longer configured through environment variables. Each user selects their own timezone in `Settings`, and that saved value is used for dashboard timestamps, history grouping, and CSV export dates.
 
 ### 3. Create the Auth user
 
@@ -72,6 +73,8 @@ This creates the current per-user tables:
 - `sessions`
 - `app_preferences`
 - `settings`
+
+The `settings` table now also stores each user's selected timezone.
 
 #### Existing database with legacy tables
 

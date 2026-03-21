@@ -5,6 +5,7 @@ import {
   formatWeekdayLabelFromIndex,
 } from "@/lib/format";
 import type { AppLocale } from "@/lib/preferences";
+import { DEFAULT_APP_TIME_ZONE } from "@/lib/timezones";
 import type {
   FocusStreakSummary,
   FocusTrendPoint,
@@ -19,7 +20,7 @@ import type {
   WeekdayFocusRow,
 } from "@/types/session";
 
-const DEFAULT_STATS_TIME_ZONE = "Asia/Seoul";
+const DEFAULT_STATS_TIME_ZONE = DEFAULT_APP_TIME_ZONE;
 const DEFAULT_STATS_LOCALE: AppLocale = "ko";
 
 export type SessionPeriodFilter = "all" | "today" | "last_7_days" | "last_30_days";

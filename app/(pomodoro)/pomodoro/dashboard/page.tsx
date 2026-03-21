@@ -6,11 +6,11 @@ import { RecentSessions } from "@/app/pomodoro/dashboard/_components/recent-sess
 import { TodayFocusCard } from "@/app/pomodoro/dashboard/_components/today-focus-card";
 import { HISTORY_PATH } from "@/lib/auth/constants";
 import { requireAuthSession } from "@/lib/auth/session";
-import { serverEnv } from "@/lib/env";
 import { getDictionary } from "@/lib/i18n/messages";
+import { createDefaultPomodoroSettings } from "@/lib/pomodoro-settings";
 import { getRequestPreferences } from "@/lib/preferences/server";
 import { buildFocusStreakSummary, buildTodaySessionSummary } from "@/lib/session-stats";
-import { getCompletedSessions, getRecentSessions } from "@/lib/supabase/queries";
+import { getCompletedSessions, getPomodoroSettings, getRecentSessions } from "@/lib/supabase/queries";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -21,9 +21,10 @@ export default async function DashboardPage() {
   const { locale } = await getRequestPreferences();
   const dictionary = getDictionary(locale);
   const nowIso = new Date().toISOString();
-  const [recentSessionsResult, todaySummarySourceResult] = await Promise.allSettled([
+  const [recentSessionsResult, todaySummarySourceResult, settingsResult] = await Promise.allSettled([
     getRecentSessions(session.supabase, session.user.id, 24),
     getCompletedSessions(session.supabase, session.user.id),
+    getPomodoroSettings(session.supabase, session.user.id),
   ]);
   const dashboardWarnings: string[] = [];
 
@@ -37,13 +38,22 @@ export default async function DashboardPage() {
     dashboardWarnings.push(dictionary.dashboard.warnings.summary);
   }
 
+  if (settingsResult.status === "rejected") {
+    console.error("Failed to load timezone setting for dashboard", settingsResult.reason);
+    dashboardWarnings.push(dictionary.dashboard.warnings.settings);
+  }
+
   const recentSessions =
     recentSessionsResult.status === "fulfilled" ? recentSessionsResult.value : [];
+  const settings =
+    settingsResult.status === "fulfilled"
+      ? settingsResult.value
+      : createDefaultPomodoroSettings();
   const todaySummary =
-    todaySummarySourceResult.status === "fulfilled"
+    todaySummarySourceResult.status === "fulfilled" && settingsResult.status === "fulfilled"
       ? buildTodaySessionSummary(todaySummarySourceResult.value, {
           nowIso,
-          timeZone: serverEnv.APP_TIMEZONE,
+          timeZone: settings.timezone,
           unlabeledTag: dictionary.common.unlabeledTag,
         })
         : {
@@ -54,10 +64,10 @@ export default async function DashboardPage() {
             topTags: [],
           };
   const streakSummary =
-    todaySummarySourceResult.status === "fulfilled"
+    todaySummarySourceResult.status === "fulfilled" && settingsResult.status === "fulfilled"
       ? buildFocusStreakSummary(todaySummarySourceResult.value, {
           nowIso,
-          timeZone: serverEnv.APP_TIMEZONE,
+          timeZone: settings.timezone,
         })
       : {
           currentStreak: 0,
@@ -66,7 +76,7 @@ export default async function DashboardPage() {
         };
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
+    <div className="flex flex-1 flex-col gap-5 sm:gap-6">
       {dashboardWarnings.length > 0 ? (
         <Card className="border-amber-200 bg-amber-50/90 dark:border-amber-400/30 dark:bg-amber-500/10">
           <CardContent className="space-y-2 p-5 text-sm leading-6 text-amber-900 dark:text-amber-100">
@@ -77,9 +87,9 @@ export default async function DashboardPage() {
         </Card>
       ) : null}
 
-      <div className="grid flex-1 gap-6 2xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+      <div className="grid flex-1 gap-5 sm:gap-6 2xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <PomodoroTimer />
-        <div className="grid gap-6">
+        <div className="grid gap-5 sm:gap-6">
           <TodayFocusCard
             copy={dictionary.dashboard.todaySummary}
             locale={locale}
@@ -92,6 +102,7 @@ export default async function DashboardPage() {
             locale={locale}
             modeCopy={dictionary.modes}
             sessions={recentSessions.slice(0, 5)}
+            timeZone={settings.timezone}
             unlabeledTag={dictionary.common.unlabeledTag}
           />
         </div>

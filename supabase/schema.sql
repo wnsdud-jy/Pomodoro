@@ -90,6 +90,7 @@ create table if not exists public.settings (
   short_break_minutes integer not null default 5 check (short_break_minutes between 1 and 60),
   long_break_minutes integer not null default 15 check (long_break_minutes between 1 and 120),
   long_break_every integer not null default 4 check (long_break_every between 1 and 12),
+  timezone text not null default 'Asia/Seoul',
   auto_advance boolean not null default true,
   auto_start_next boolean not null default false,
   sound_enabled boolean not null default true,
@@ -97,6 +98,9 @@ create table if not exists public.settings (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.settings
+  add column if not exists timezone text not null default 'Asia/Seoul';
 
 alter table public.settings enable row level security;
 

@@ -65,7 +65,7 @@ export function HistoryOverview({
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <SummaryCard
           caption={copy.focusCountTemplate.replace(
             "{count}",

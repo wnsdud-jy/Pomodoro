@@ -3,7 +3,6 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { formatDateKey, getTodayDateKey } from "@/lib/format";
-import { serverEnv } from "@/lib/env";
 import {
   DEFAULT_POMODORO_SETTINGS_VALUES,
   mergePomodoroSettings,
@@ -15,6 +14,7 @@ import {
   type AppLocale,
   type AppTheme,
 } from "@/lib/preferences";
+import { DEFAULT_APP_TIME_ZONE } from "@/lib/timezones";
 import type { PomodoroSettings, PomodoroSettingsValues } from "@/types/settings";
 import type { CreateSessionPayload, SessionRow } from "@/types/session";
 
@@ -76,6 +76,7 @@ export async function getRecentSessions(
 export async function getTodayFocusSeconds(
   supabase: SupabaseClient,
   userId: string,
+  timeZone = DEFAULT_APP_TIME_ZONE,
 ) {
   const lookbackStart = new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString();
 
@@ -91,10 +92,10 @@ export async function getTodayFocusSeconds(
     throw new Error(`Failed to fetch focus summary: ${error.message}`);
   }
 
-  const todayKey = getTodayDateKey(serverEnv.APP_TIMEZONE);
+  const todayKey = getTodayDateKey(timeZone);
 
   return (data ?? []).reduce((total, session) => {
-    if (formatDateKey(session.ended_at, serverEnv.APP_TIMEZONE) !== todayKey) {
+    if (formatDateKey(session.ended_at, timeZone) !== todayKey) {
       return total;
     }
 
@@ -297,6 +298,7 @@ export async function upsertPomodoroSettings(
       payload.long_break_minutes ?? currentSettings.long_break_minutes,
     long_break_every:
       payload.long_break_every ?? currentSettings.long_break_every,
+    timezone: payload.timezone ?? currentSettings.timezone,
     auto_advance: payload.auto_advance ?? currentSettings.auto_advance,
     auto_start_next: payload.auto_start_next ?? currentSettings.auto_start_next,
     sound_enabled: payload.sound_enabled ?? currentSettings.sound_enabled,

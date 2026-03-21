@@ -108,7 +108,7 @@ export function HistoryAnalytics({
   );
 
   return (
-    <section className="grid gap-6 xl:grid-cols-2">
+    <section className="grid gap-5 sm:gap-6 xl:grid-cols-2">
       <AnalyticsCard
         description={copy.last7Description}
         icon={<BarChart3 aria-hidden="true" className="size-5" />}

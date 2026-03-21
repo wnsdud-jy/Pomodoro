@@ -1,6 +1,6 @@
 # Pomodoro
 
-Pomodoro는 개인용 뽀모도로 타이머 앱입니다. Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, Supabase를 기반으로 만들었고, 현재는 한 명의 인증된 사용자가 사용하는 흐름에 맞춰져 있습니다. 다만 데이터베이스 구조는 이미 `user_id` 기준으로 정리되어 있어서 RLS 기반 사용자 격리 구조를 그대로 확장할 수 있습니다.
+Pomodoro는 뽀모도로 타이머 앱입니다. Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, Supabase를 기반으로 만들었고, 현재는 한 명의 인증된 사용자가 사용하는 흐름에 맞춰져 있습니다. 다만 데이터베이스 구조는 이미 `user_id` 기준으로 정리되어 있어서 RLS 기반 사용자 격리 구조를 그대로 확장할 수 있습니다.
 
 ## 개요
 
@@ -42,10 +42,11 @@ npm install
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-APP_TIMEZONE=Asia/Seoul
 ```
 
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`는 브라우저에서 사용하는 공개 키입니다. 일반 앱 요청 경로에는 서비스 롤 키를 사용하지 않습니다.
+
+이제 시간대는 환경 변수가 아니라 사용자별 `Settings` 화면에서 설정합니다. 저장된 시간대는 대시보드 시간, 기록 묶음, CSV 내보내기 날짜 기준에 사용됩니다.
 
 ### 3. Auth 사용자 만들기
 
@@ -72,6 +73,8 @@ Pomodoro 테이블이 아직 없다면 아래 파일만 실행하세요.
 - `sessions`
 - `app_preferences`
 - `settings`
+
+`settings` 테이블에는 사용자별 시간대도 함께 저장됩니다.
 
 #### 기존 데이터베이스 업그레이드
 

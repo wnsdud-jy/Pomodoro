@@ -207,7 +207,7 @@ export function HistorySessionList({
                             </p>
                           }
                         />
-                        <div className="flex justify-end xl:justify-start">
+                        <div className="flex justify-stretch sm:justify-end xl:justify-start">
                           <Button
                             className="w-full text-rose-600 hover:text-rose-700 sm:w-auto dark:text-rose-200 dark:hover:text-rose-100"
                             disabled={isDeleting}

@@ -142,8 +142,8 @@ function FlowStat({
     <div
       className={
         tone === "accent"
-          ? "rounded-[24px] border border-teal-200/80 bg-teal-50/85 p-4 shadow-sm transition-[transform,background-color,border-color] dark:border-teal-400/20 dark:bg-teal-500/10"
-          : "rounded-[24px] border border-slate-200/80 bg-white/70 p-4 shadow-sm transition-[transform,background-color,border-color] dark:border-white/10 dark:bg-slate-950/45"
+          ? "rounded-[22px] border border-teal-200/80 bg-teal-50/85 p-4 shadow-sm transition-[transform,background-color,border-color] sm:rounded-[24px] dark:border-teal-400/20 dark:bg-teal-500/10"
+          : "rounded-[22px] border border-slate-200/80 bg-white/70 p-4 shadow-sm transition-[transform,background-color,border-color] sm:rounded-[24px] dark:border-white/10 dark:bg-slate-950/45"
       }
     >
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
@@ -180,17 +180,12 @@ function DemoPomodoroTimer({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <Badge>{modeCopy[selectedMode].shortLabel}</Badge>
-            <CardTitle className="text-3xl text-balance md:text-4xl">
+            <CardTitle className="text-2xl text-balance sm:text-3xl md:text-4xl">
               {timerCopy.title}
             </CardTitle>
             <CardDescription>{modeCopy[selectedMode].description}</CardDescription>
           </div>
-          <Button
-            asChild
-            className="focus-visible:ring-0 focus-visible:ring-offset-0"
-            size="sm"
-            variant="secondary"
-          >
+          <Button asChild size="sm" variant="secondary">
             <Link aria-label={timerCopy.fullViewAria} href="/pomodoro/demo/focus">
               <Expand aria-hidden="true" className="size-4" />
               {timerCopy.fullView}
@@ -234,22 +229,20 @@ function DemoPomodoroTimer({
         </div>
 
         <Tabs value={selectedMode}>
-          <TabsList className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {MODE_ORDER.map((mode) => (
-              <TabsTrigger
-                className="min-h-11 focus-visible:ring-0 focus-visible:ring-offset-0"
-                key={mode}
-                value={mode}
-              >
-                {modeCopy[mode].label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="overflow-x-auto pb-1">
+            <TabsList className="flex min-w-max gap-2 rounded-[20px] p-1.5 sm:grid sm:min-w-0 sm:grid-cols-3 sm:gap-2">
+              {MODE_ORDER.map((mode) => (
+                <TabsTrigger className="min-h-11 min-w-[132px] px-4 sm:min-w-0" disabled key={mode} value={mode}>
+                  {modeCopy[mode].label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
         </Tabs>
       </CardHeader>
 
       <CardContent className="relative space-y-6">
-        <div className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-100/70 p-6 dark:border-white/10 dark:bg-slate-950/55">
+        <div className="overflow-hidden rounded-[28px] border border-slate-200/50 bg-slate-100/70 p-5 sm:rounded-[32px] sm:p-6 dark:border-white/10 dark:bg-slate-950/55">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
               {timerCopy.remainingTime}
@@ -258,44 +251,40 @@ function DemoPomodoroTimer({
               {timerCopy.status.idle}
             </p>
           </div>
-          <p className="mt-6 text-center font-mono text-[clamp(4rem,16vw,6.5rem)] font-semibold tracking-[-0.06em] text-slate-950 tabular-nums dark:text-slate-50">
+          <p className="mt-5 text-center font-mono text-[clamp(3.5rem,18vw,6.5rem)] font-semibold tracking-[-0.06em] text-slate-950 tabular-nums sm:mt-6 dark:text-slate-50">
             25:00
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
-            <Button
-              className="w-full sm:w-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-              size="lg"
-              type="button"
-            >
+            <Button className="w-full sm:w-auto" disabled size="lg" type="button">
               <Play aria-hidden="true" className="size-4" />
               {timerCopy.start}
             </Button>
-            <Button
-              className="w-full sm:w-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-              size="lg"
-              type="button"
-              variant="secondary"
-            >
+            <Button className="w-full sm:w-auto" disabled size="lg" type="button" variant="secondary">
               <RotateCcw aria-hidden="true" className="size-4" />
               {timerCopy.reset}
             </Button>
           </div>
         </div>
 
-        <div className="space-y-3 rounded-[28px] border border-slate-200/80 bg-slate-50/80 p-5 dark:border-transparent dark:bg-slate-950/45">
+        <div className="space-y-3 rounded-[24px] border border-slate-200/80 bg-slate-50/80 p-4 sm:rounded-[28px] sm:p-5 dark:border-transparent dark:bg-slate-950/45">
           <Label htmlFor="demo-session-tag">{timerCopy.tagLabel}</Label>
-          <Input
-            autoComplete="off"
-            className="focus-visible:ring-0 focus-visible:ring-offset-0"
-            id="demo-session-tag"
-            name="tag"
-            readOnly
+            <Input
+              autoComplete="off"
+              disabled
+              id="demo-session-tag"
+              name="tag"
+              readOnly
             value={tagValue}
           />
-          <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-            {timerCopy.tagHelp}
-          </p>
-        </div>
+            <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
+              {timerCopy.tagHelp}
+            </p>
+            <p className="text-xs leading-5 text-slate-400 dark:text-slate-500">
+              {locale === "ko"
+                ? "이 입력과 타이머 버튼은 데모에서 비활성화되어 있습니다."
+                : "This field and the timer controls are disabled in the demo."}
+            </p>
+          </div>
 
         <div className="flex items-start gap-3 rounded-[28px] border border-slate-200 bg-white/70 px-5 py-4 text-sm leading-6 text-slate-600 transition-colors dark:border-transparent dark:bg-slate-950/45 dark:text-slate-300">
           <BellRing
@@ -334,7 +323,7 @@ function DemoRecentSessions({
       <CardContent className="space-y-4">
         {DEMO_SESSIONS.map((session, index) => (
           <div key={session.id}>
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">{modeCopy[session.mode].shortLabel}</Badge>
@@ -346,7 +335,7 @@ function DemoRecentSessions({
                   {formatDurationLabel(session.duration_seconds, locale)}
                 </p>
               </div>
-              <p className="shrink-0 text-sm text-slate-500 dark:text-slate-400">
+              <p className="shrink-0 text-sm text-slate-500 dark:text-slate-400 sm:text-right">
                 {formatDateTime(session.ended_at, "Asia/Seoul", locale)}
               </p>
             </div>
@@ -367,27 +356,35 @@ export default async function DemoPage() {
 
   return (
     <main
-      className="relative isolate min-h-screen overflow-x-hidden px-4 pb-4 md:px-6 md:pb-6"
+      className="relative isolate min-h-screen overflow-x-hidden px-3 pb-5 sm:px-4 md:px-6 md:pb-6"
       id="main-content"
       style={{
         paddingTop: "max(1rem, env(safe-area-inset-top))",
         paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+        paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+        paddingRight: "max(0.75rem, env(safe-area-inset-right))",
       }}
     >
-      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-[max(1rem,env(safe-area-inset-top))] md:px-6">
-        <div className="mx-auto max-w-7xl rounded-[28px] border border-slate-200/80 bg-white/82 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(6,14,30,0.74)] dark:shadow-[0_20px_80px_-40px_rgba(37,99,235,0.42)]">
-          <div className="flex h-16 items-center justify-between gap-3 px-4 md:px-6">
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-700 ring-1 ring-cyan-400/20 dark:text-cyan-300 dark:ring-cyan-400/15">
-                <Hourglass aria-hidden="true" className="size-5" />
+      <header
+        className="fixed inset-x-0 top-0 z-50 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-4 md:px-6"
+        style={{
+          paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+          paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+        }}
+      >
+        <div className="mx-auto max-w-7xl rounded-[24px] border border-slate-200/80 bg-white/82 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] backdrop-blur-2xl sm:rounded-[28px] dark:border-white/10 dark:bg-[rgba(6,14,30,0.74)] dark:shadow-[0_20px_80px_-40px_rgba(37,99,235,0.42)]">
+          <div className="flex min-h-14 items-center justify-between gap-2 px-3 sm:min-h-16 sm:gap-3 sm:px-4 md:px-6">
+            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+              <div className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-700 ring-1 ring-cyan-400/20 sm:size-10 dark:text-cyan-300 dark:ring-cyan-400/15">
+                <Hourglass aria-hidden="true" className="size-4 sm:size-5" />
               </div>
 
-              <p className="truncate text-base font-semibold text-slate-900 md:text-lg dark:text-white">
+              <p className="truncate text-sm font-semibold text-slate-900 sm:text-base md:text-lg dark:text-white">
                 {dictionary.common.appName}
               </p>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <PreferencesToolbar
                 copy={dictionary.common}
                 initialLocale={locale}
@@ -399,11 +396,11 @@ export default async function DemoPage() {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-7xl pt-24 md:pt-28">
+      <div className="mx-auto w-full max-w-7xl pt-20 sm:pt-24 md:pt-28">
         <div className="mx-auto w-full max-w-5xl">
-          <div className="flex flex-1 flex-col gap-6">
+          <div className="flex flex-1 flex-col gap-5 sm:gap-6">
             <Card className="border-cyan-200/80 bg-cyan-50/85 dark:border-cyan-400/20 dark:bg-cyan-500/10">
-              <CardContent className="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between">
+              <CardContent className="flex flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
                   <Badge className="w-fit bg-cyan-600 text-white hover:bg-cyan-600">
                     Demo Preview
@@ -421,18 +418,18 @@ export default async function DemoPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button asChild size="sm" variant="secondary">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <Button asChild className="w-full sm:w-auto" size="sm" variant="secondary">
                     <Link href="/pomodoro/demo">
                       {dictionary.common.dashboardNav}
                     </Link>
                   </Button>
-                  <Button asChild size="sm" variant="outline">
+                  <Button asChild className="w-full sm:w-auto" size="sm" variant="outline">
                     <Link href="/pomodoro/demo/history">
                       {dictionary.common.historyNav}
                     </Link>
                   </Button>
-                  <Button asChild size="sm" variant="outline">
+                  <Button asChild className="w-full sm:w-auto" size="sm" variant="outline">
                     <Link href="/pomodoro/demo/settings">
                       {dictionary.common.settingsNav}
                     </Link>
@@ -440,9 +437,9 @@ export default async function DemoPage() {
                 </div>
               </CardContent>
             </Card>
-            <div className="grid flex-1 gap-6 2xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+            <div className="grid flex-1 gap-5 sm:gap-6 2xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
               <DemoPomodoroTimer locale={locale} />
-              <div className="grid gap-6">
+              <div className="grid gap-5 sm:gap-6">
                 <TodayFocusCard
                   copy={dictionary.dashboard.todaySummary}
                   locale={locale}

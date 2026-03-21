@@ -49,7 +49,7 @@ export function TodayFocusCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 grid-cols-2 xl:grid-cols-2">
           <MetricTile
             label={copy.totalFocusLabel}
             value={formatDurationLabel(summary.focusSeconds, locale)}

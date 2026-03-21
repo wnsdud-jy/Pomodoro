@@ -15,7 +15,6 @@ import { Separator } from "@/components/ui/separator";
 import { formatDateTime, formatDurationLabel } from "@/lib/format";
 import type { AppDictionary } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/preferences";
-import { serverEnv } from "@/lib/env";
 import type { SessionRow } from "@/types/session";
 
 export function RecentSessions({
@@ -25,6 +24,7 @@ export function RecentSessions({
   modeCopy,
   unlabeledTag,
   historyHref,
+  timeZone,
 }: {
   sessions: SessionRow[];
   locale: AppLocale;
@@ -32,6 +32,7 @@ export function RecentSessions({
   modeCopy: AppDictionary["modes"];
   unlabeledTag: string;
   historyHref: string;
+  timeZone: string;
 }) {
   return (
     <Card>
@@ -52,7 +53,7 @@ export function RecentSessions({
         ) : (
           sessions.map((session, index) => (
             <div key={session.id}>
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="secondary">{modeCopy[session.mode].shortLabel}</Badge>
@@ -64,8 +65,8 @@ export function RecentSessions({
                     {formatDurationLabel(session.duration_seconds, locale)}
                   </p>
                 </div>
-                <p className="shrink-0 text-sm text-slate-500 dark:text-slate-400">
-                  {formatDateTime(session.ended_at, serverEnv.APP_TIMEZONE, locale)}
+                <p className="shrink-0 text-sm text-slate-500 dark:text-slate-400 sm:text-right">
+                  {formatDateTime(session.ended_at, timeZone, locale)}
                 </p>
               </div>
               {index < sessions.length - 1 ? <Separator className="mt-4" /> : null}

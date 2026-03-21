@@ -243,27 +243,35 @@ export default async function DemoHistoryPage() {
 
   return (
     <main
-      className="relative isolate min-h-screen overflow-x-hidden px-4 pb-4 md:px-6 md:pb-6"
+      className="relative isolate min-h-screen overflow-x-hidden px-3 pb-5 sm:px-4 md:px-6 md:pb-6"
       id="main-content"
       style={{
         paddingTop: "max(1rem, env(safe-area-inset-top))",
         paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+        paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+        paddingRight: "max(0.75rem, env(safe-area-inset-right))",
       }}
     >
-      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-[max(1rem,env(safe-area-inset-top))] md:px-6">
-        <div className="mx-auto max-w-7xl rounded-[28px] border border-slate-200/80 bg-white/82 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-white/10 dark:bg-[rgba(6,14,30,0.74)] dark:shadow-[0_20px_80px_-40px_rgba(37,99,235,0.42)]">
-          <div className="flex h-16 items-center justify-between gap-3 px-4 md:px-6">
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <div className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-700 ring-1 ring-cyan-400/20 dark:text-cyan-300 dark:ring-cyan-400/15">
-                <History aria-hidden="true" className="size-5" />
+      <header
+        className="fixed inset-x-0 top-0 z-50 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-4 md:px-6"
+        style={{
+          paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+          paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+        }}
+      >
+        <div className="mx-auto max-w-7xl rounded-[24px] border border-slate-200/80 bg-white/82 shadow-[0_20px_60px_-36px_rgba(15,23,42,0.18)] backdrop-blur-2xl sm:rounded-[28px] dark:border-white/10 dark:bg-[rgba(6,14,30,0.74)] dark:shadow-[0_20px_80px_-40px_rgba(37,99,235,0.42)]">
+          <div className="flex min-h-14 items-center justify-between gap-2 px-3 sm:min-h-16 sm:gap-3 sm:px-4 md:px-6">
+            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+              <div className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-700 ring-1 ring-cyan-400/20 sm:size-10 dark:text-cyan-300 dark:ring-cyan-400/15">
+                <History aria-hidden="true" className="size-4 sm:size-5" />
               </div>
 
-              <p className="truncate text-base font-semibold text-slate-900 md:text-lg dark:text-white">
+              <p className="truncate text-sm font-semibold text-slate-900 sm:text-base md:text-lg dark:text-white">
                 {dictionary.common.appName}
               </p>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <PreferencesToolbar
                 copy={dictionary.common}
                 initialLocale={locale}
@@ -275,11 +283,11 @@ export default async function DemoHistoryPage() {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-7xl pt-24 md:pt-28">
+      <div className="mx-auto w-full max-w-7xl pt-20 sm:pt-24 md:pt-28">
         <div className="mx-auto w-full max-w-5xl">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5 sm:gap-6">
             <Card className="border-cyan-200/80 bg-cyan-50/85 dark:border-cyan-400/20 dark:bg-cyan-500/10">
-              <CardContent className="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between">
+              <CardContent className="flex flex-col gap-4 p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
                   <Badge className="w-fit bg-cyan-600 text-white hover:bg-cyan-600">
                     Demo Preview
@@ -297,14 +305,14 @@ export default async function DemoHistoryPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button asChild size="sm" variant="outline">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <Button asChild className="w-full sm:w-auto" size="sm" variant="outline">
                     <Link href="/pomodoro/demo">{dictionary.common.dashboardNav}</Link>
                   </Button>
-                  <Button asChild size="sm" variant="secondary">
+                  <Button asChild className="w-full sm:w-auto" size="sm" variant="secondary">
                     <Link href="/pomodoro/demo/history">{dictionary.common.historyNav}</Link>
                   </Button>
-                  <Button asChild size="sm" variant="outline">
+                  <Button asChild className="w-full sm:w-auto" size="sm" variant="outline">
                     <Link href="/pomodoro/demo/settings">{dictionary.common.settingsNav}</Link>
                   </Button>
                 </div>
@@ -321,7 +329,7 @@ export default async function DemoHistoryPage() {
                 </p>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <SummaryCard
                   caption={historyCopy.overview.focusCountTemplate.replace("{count}", "6")}
                   icon={<CalendarDays aria-hidden="true" className="size-5" />}
@@ -355,7 +363,7 @@ export default async function DemoHistoryPage() {
               </div>
             </section>
 
-            <section className="grid gap-6 xl:grid-cols-2">
+            <section className="grid gap-5 sm:gap-6 xl:grid-cols-2">
               <AnalyticsCard
                 description={historyCopy.analytics.last7Description}
                 icon={<BarChart3 aria-hidden="true" className="size-5" />}
@@ -468,7 +476,7 @@ export default async function DemoHistoryPage() {
               <CardHeader className="space-y-2">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <CardTitle>{historyCopy.filters.title}</CardTitle>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                     <Badge className="gap-2" variant="secondary">
                       <Layers3 aria-hidden="true" className="size-4" />
                       {historyCopy.filters.resultsTemplate.replace(
@@ -483,32 +491,36 @@ export default async function DemoHistoryPage() {
                 <div className="space-y-2">
                   <Label>{historyCopy.filters.all}</Label>
                   <Tabs value="all">
-                    <TabsList className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                      <TabsTrigger value="all">{historyCopy.filters.all}</TabsTrigger>
-                      <TabsTrigger value="focus">{dictionary.modes.focus.label}</TabsTrigger>
-                      <TabsTrigger value="short_break">
-                        {dictionary.modes.short_break.label}
-                      </TabsTrigger>
-                      <TabsTrigger value="long_break">
-                        {dictionary.modes.long_break.label}
-                      </TabsTrigger>
-                    </TabsList>
+                    <div className="overflow-x-auto pb-1">
+                      <TabsList className="flex min-w-max gap-2 rounded-[20px] p-1.5 sm:grid sm:min-w-0 sm:grid-cols-4">
+                      <TabsTrigger className="min-h-11 min-w-[96px] px-4 sm:min-w-0" disabled value="all">{historyCopy.filters.all}</TabsTrigger>
+                        <TabsTrigger className="min-h-11 min-w-[96px] px-4 sm:min-w-0" disabled value="focus">{dictionary.modes.focus.label}</TabsTrigger>
+                        <TabsTrigger className="min-h-11 min-w-[148px] px-4 sm:min-w-0" disabled value="short_break">
+                          {dictionary.modes.short_break.label}
+                        </TabsTrigger>
+                        <TabsTrigger className="min-h-11 min-w-[148px] px-4 sm:min-w-0" disabled value="long_break">
+                          {dictionary.modes.long_break.label}
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
                   </Tabs>
                 </div>
 
                 <div className="space-y-2">
                   <Label>{historyCopy.filters.periodLabel}</Label>
                   <Tabs value="last_7_days">
-                    <TabsList className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                      <TabsTrigger value="all">{historyCopy.filters.periodAll}</TabsTrigger>
-                      <TabsTrigger value="today">{historyCopy.filters.periodToday}</TabsTrigger>
-                      <TabsTrigger value="last_7_days">
-                        {historyCopy.filters.periodLast7Days}
-                      </TabsTrigger>
-                      <TabsTrigger value="last_30_days">
-                        {historyCopy.filters.periodLast30Days}
-                      </TabsTrigger>
-                    </TabsList>
+                    <div className="overflow-x-auto pb-1">
+                      <TabsList className="flex min-w-max gap-2 rounded-[20px] p-1.5 sm:grid sm:min-w-0 sm:grid-cols-4">
+                        <TabsTrigger className="min-h-11 min-w-[112px] px-4 sm:min-w-0" disabled value="all">{historyCopy.filters.periodAll}</TabsTrigger>
+                        <TabsTrigger className="min-h-11 min-w-[124px] px-4 sm:min-w-0" disabled value="today">{historyCopy.filters.periodToday}</TabsTrigger>
+                        <TabsTrigger className="min-h-11 min-w-[148px] px-4 sm:min-w-0" disabled value="last_7_days">
+                          {historyCopy.filters.periodLast7Days}
+                        </TabsTrigger>
+                        <TabsTrigger className="min-h-11 min-w-[160px] px-4 sm:min-w-0" disabled value="last_30_days">
+                          {historyCopy.filters.periodLast30Days}
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
                   </Tabs>
                 </div>
 
@@ -523,10 +535,11 @@ export default async function DemoHistoryPage() {
                       <Input
                         autoComplete="off"
                         className="pl-10"
+                        disabled
                         id="demo-history-tag"
                         name="tag"
                         readOnly
-                        value={locale === "ko" ? "수" : "ma"}
+                        value=""
                       />
                     </div>
                   </div>
@@ -540,10 +553,11 @@ export default async function DemoHistoryPage() {
                       />
                       <Input
                         className="pl-10"
+                        disabled
                         id="demo-history-date"
                         name="date"
                         readOnly
-                        value="2026-03-19"
+                        value=""
                       />
                     </div>
                   </div>
@@ -552,13 +566,18 @@ export default async function DemoHistoryPage() {
                 <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
                   {historyCopy.filters.dateDescription}
                 </p>
+                <p className="text-xs leading-5 text-slate-400 dark:text-slate-500">
+                  {locale === "ko"
+                    ? "필터 탭과 입력은 정적인 예시이며, 현재 결과 목록을 실제로 바꾸지 않습니다."
+                    : "Filter tabs and inputs are static examples and do not change the demo results list."}
+                </p>
 
-                <div className="flex flex-wrap gap-2">
-                  <Button disabled size="sm" type="button" variant="secondary">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <Button className="w-full sm:w-auto" disabled size="sm" type="button" variant="secondary">
                     <CalendarRange aria-hidden="true" className="size-4" />
                     {historyCopy.filters.clear}
                   </Button>
-                  <Button disabled size="sm" type="button" variant="outline">
+                  <Button className="w-full sm:w-auto" disabled size="sm" type="button" variant="outline">
                     {historyCopy.filters.export}
                   </Button>
                 </div>
@@ -637,7 +656,7 @@ export default async function DemoHistoryPage() {
                                 </p>
                               }
                             />
-                            <div className="flex justify-end xl:justify-start">
+                            <div className="flex justify-stretch sm:justify-end xl:justify-start">
                               <Button
                                 className="w-full text-rose-600 hover:text-rose-700 sm:w-auto dark:text-rose-200 dark:hover:text-rose-100"
                                 disabled

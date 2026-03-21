@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { History, LayoutDashboard, Settings2, X } from "lucide-react";
 import Link from "next/link";
 
@@ -131,24 +132,55 @@ export function MobileNavigationDrawer({
   onClose: () => void;
   open: boolean;
 }) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousActiveElement = document.activeElement;
+
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+
+      if (previousActiveElement instanceof HTMLElement) {
+        previousActiveElement.focus();
+      }
+    };
+  }, [onClose, open]);
+
   if (!open) {
     return null;
   }
 
   return (
     <div
+      aria-label={commonCopy.navigationLabel}
       aria-modal="true"
       className="fixed inset-0 z-[60] flex lg:hidden"
       role="dialog"
     >
-      <div className="max-h-screen w-[min(88vw,22rem)] overscroll-contain border-r border-white/10 bg-[rgba(6,14,30,0.92)] p-4 shadow-[20px_0_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="max-h-screen w-[min(92vw,24rem)] overscroll-contain rounded-r-[28px] border-r border-white/10 bg-[rgba(6,14,30,0.94)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] shadow-[20px_0_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+        <div className="mb-5 flex items-center justify-between gap-3">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
             {commonCopy.navigationLabel}
           </p>
           <Button
-            aria-label={commonCopy.closeSettings}
+            aria-label={`${commonCopy.closeSettings} ${commonCopy.navigationLabel}`}
             onClick={onClose}
+            ref={closeButtonRef}
             size="icon"
             type="button"
             variant="ghost"
@@ -166,7 +198,7 @@ export function MobileNavigationDrawer({
         </Card>
       </div>
       <button
-        aria-label={commonCopy.closeSettings}
+        aria-label={`${commonCopy.closeSettings} ${commonCopy.navigationLabel}`}
         className="flex-1 bg-slate-950/60 backdrop-blur-sm"
         onClick={onClose}
         type="button"

@@ -75,6 +75,8 @@ export function HistoryView({
   modeCopy: AppDictionary["modes"];
   unlabeledTag: string;
 }) {
+  const confirmCancelButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogPreviousFocusRef = useRef<HTMLElement | null>(null);
   const [sessions, setSessions] = useState(initialSessions);
   const [modeFilter, setModeFilter] = useState<SessionModeFilter>(initialModeFilter);
   const [periodFilter, setPeriodFilter] =
@@ -129,6 +131,32 @@ export function HistoryView({
       window.removeEventListener("popstate", handlePopState);
     };
   }, [initialModeFilter, initialPeriodFilter, initialSelectedDate, initialTagQuery]);
+
+  useEffect(() => {
+    if (!confirmingId) {
+      return;
+    }
+
+    dialogPreviousFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+
+    confirmCancelButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setConfirmingId(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      dialogPreviousFocusRef.current?.focus();
+    };
+  }, [confirmingId]);
 
   useEffect(() => {
     if (!hasHydratedFromUrlRef.current) {
@@ -356,7 +384,7 @@ export function HistoryView({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <HistoryOverview
         copy={copy.overview}
         locale={locale}
@@ -380,7 +408,7 @@ export function HistoryView({
         <CardHeader className="space-y-2">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <CardTitle>{copy.filters.title}</CardTitle>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               <Badge variant="secondary" className="gap-2">
                 <Sparkles aria-hidden="true" className="size-3.5" />
                 {copy.filters.resultsTemplate.replace(
@@ -396,39 +424,43 @@ export function HistoryView({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 sm:space-y-5">
           <Tabs onValueChange={(value) => setPeriodFilter(value as SessionPeriodFilter)} value={periodFilter}>
-            <TabsList className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-              <TabsTrigger value="today" className="gap-2">
+            <div className="overflow-x-auto pb-1">
+              <TabsList className="flex min-w-max gap-2 rounded-[20px] p-1.5 lg:grid lg:min-w-0 lg:grid-cols-4">
+              <TabsTrigger value="today" className="min-h-11 min-w-[124px] gap-2 px-4 lg:min-w-0">
                 <CalendarDays aria-hidden="true" className="size-4" />
                 {copy.filters.periodToday}
               </TabsTrigger>
-              <TabsTrigger value="last_7_days" className="gap-2">
+              <TabsTrigger value="last_7_days" className="min-h-11 min-w-[148px] gap-2 px-4 lg:min-w-0">
                 <CalendarRange aria-hidden="true" className="size-4" />
                 {copy.filters.periodLast7Days}
               </TabsTrigger>
-              <TabsTrigger value="last_30_days" className="gap-2">
+              <TabsTrigger value="last_30_days" className="min-h-11 min-w-[160px] gap-2 px-4 lg:min-w-0">
                 <CalendarRange aria-hidden="true" className="size-4" />
                 {copy.filters.periodLast30Days}
               </TabsTrigger>
-              <TabsTrigger value="all" className="gap-2">
+              <TabsTrigger value="all" className="min-h-11 min-w-[112px] gap-2 px-4 lg:min-w-0">
                 <Layers3 aria-hidden="true" className="size-4" />
                 {copy.filters.periodAll}
               </TabsTrigger>
-            </TabsList>
+              </TabsList>
+            </div>
           </Tabs>
 
           <Tabs onValueChange={(value) => setModeFilter(value as SessionModeFilter)} value={modeFilter}>
-            <TabsList className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <TabsTrigger value="all">{copy.filters.all}</TabsTrigger>
-              <TabsTrigger value="focus">{modeCopy.focus.shortLabel}</TabsTrigger>
-              <TabsTrigger value="short_break">
+            <div className="overflow-x-auto pb-1">
+              <TabsList className="flex min-w-max gap-2 rounded-[20px] p-1.5 sm:grid sm:min-w-0 sm:grid-cols-4">
+              <TabsTrigger className="min-h-11 min-w-[96px] px-4 sm:min-w-0" value="all">{copy.filters.all}</TabsTrigger>
+              <TabsTrigger className="min-h-11 min-w-[96px] px-4 sm:min-w-0" value="focus">{modeCopy.focus.shortLabel}</TabsTrigger>
+              <TabsTrigger className="min-h-11 min-w-[148px] px-4 sm:min-w-0" value="short_break">
                 {modeCopy.short_break.shortLabel}
               </TabsTrigger>
-              <TabsTrigger value="long_break">
+              <TabsTrigger className="min-h-11 min-w-[148px] px-4 sm:min-w-0" value="long_break">
                 {modeCopy.long_break.shortLabel}
               </TabsTrigger>
-            </TabsList>
+              </TabsList>
+            </div>
           </Tabs>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.9fr)]">
@@ -466,11 +498,12 @@ export function HistoryView({
             />
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-slate-500 dark:text-slate-400">
               {copy.filters.periodLabel}: {currentPeriodLabel}
             </p>
             <Button
+              className="w-full sm:w-auto"
               disabled={
                 modeFilter === "all" &&
                 periodFilter === "all" &&
@@ -517,7 +550,7 @@ export function HistoryView({
       />
 
       {confirmingId ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-4 backdrop-blur-sm sm:items-center">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:items-center sm:p-4">
           <Card
             aria-labelledby="history-delete-title"
             aria-modal="true"
@@ -533,6 +566,7 @@ export function HistoryView({
             <CardContent className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Button
                 onClick={() => setConfirmingId(null)}
+                ref={confirmCancelButtonRef}
                 type="button"
                 variant="ghost"
               >

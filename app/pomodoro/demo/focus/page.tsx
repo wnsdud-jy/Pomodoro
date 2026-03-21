@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ArrowLeft, BellRing, Play, RotateCcw } from "lucide-react";
 import Link from "next/link";
 
+import { DemoFocusScrollLock } from "@/app/pomodoro/demo/focus/_components/demo-focus-scroll-lock";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,8 +31,13 @@ export default async function DemoFocusPage() {
   return (
     <section
       aria-labelledby="demo-focus-mode-title"
-      className="fixed inset-0 z-[80] overflow-hidden px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:px-6"
+      className="fixed inset-0 z-[80] overflow-hidden px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-4 md:px-6"
+      style={{
+        paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+        paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+      }}
     >
+      <DemoFocusScrollLock />
       <div className="absolute inset-0 bg-[rgba(3,8,21,0.94)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_34%),radial-gradient(circle_at_bottom,rgba(45,212,191,0.12),transparent_38%)]" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-teal-500 to-cyan-500 opacity-30 blur-3xl transition-opacity duration-500" />
@@ -45,7 +51,7 @@ export default async function DemoFocusPage() {
             </Link>
           </Button>
 
-          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+          <div className="flex min-w-0 w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
             <Badge className="bg-white/10 text-white hover:bg-white/10">
               {modeCopy[selectedMode].shortLabel}
             </Badge>
@@ -72,32 +78,35 @@ export default async function DemoFocusPage() {
             {copy.status.idle}
           </div>
 
-          <p className="max-w-3xl text-balance text-lg leading-7 text-slate-300 md:text-xl">
+          <p className="max-w-3xl text-balance text-base leading-7 text-slate-300 sm:text-lg md:text-xl">
             {locale === "ko"
               ? "실제 저장이나 자동 전환 없이, 전체보기 집중 화면 UI만 체험하는 데모입니다."
               : "A static preview of the focus full-view screen without real saving or automatic transitions."}
           </p>
 
-          <p className="font-mono text-[clamp(5rem,18vw,9rem)] font-semibold tracking-[-0.08em] text-white tabular-nums">
+          <p className="font-mono text-[clamp(4rem,18vw,9rem)] font-semibold tracking-[-0.08em] text-white tabular-nums">
             {formatSeconds(1500)}
           </p>
         </div>
 
-        <div className="mx-auto w-full max-w-5xl rounded-[30px] border border-white/10 bg-white/6 p-4 shadow-[0_24px_80px_-52px_rgba(15,23,42,0.95)] backdrop-blur-xl md:p-5">
+        <div className="mx-auto w-full max-w-5xl rounded-[28px] border border-white/10 bg-white/6 p-4 shadow-[0_24px_80px_-52px_rgba(15,23,42,0.95)] backdrop-blur-xl sm:rounded-[30px] md:p-5">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)] xl:items-center">
             <div className="min-w-0 space-y-3">
               <Tabs value={selectedMode}>
-                <TabsList className="grid grid-cols-1 gap-2 bg-white/8 p-1.5 sm:grid-cols-3">
-                  {MODE_ORDER.map((mode) => (
-                    <TabsTrigger
-                      className="min-h-11 border-0 data-[state=active]:bg-white/14 data-[state=active]:text-white"
-                      key={mode}
-                      value={mode}
-                    >
-                      {modeCopy[mode].label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+                <div className="overflow-x-auto pb-1">
+                  <TabsList className="flex min-w-max gap-2 bg-white/8 p-1.5 sm:grid sm:min-w-0 sm:grid-cols-3">
+                    {MODE_ORDER.map((mode) => (
+                      <TabsTrigger
+                        className="min-h-11 min-w-[132px] border-0 px-4 data-[state=active]:bg-white/14 data-[state=active]:text-white sm:min-w-0"
+                        disabled
+                        key={mode}
+                        value={mode}
+                      >
+                        {modeCopy[mode].label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
               </Tabs>
 
               <div className="flex flex-wrap gap-2">
@@ -117,6 +126,7 @@ export default async function DemoFocusPage() {
               <Input
                 autoComplete="off"
                 className="border-white/10 bg-slate-950/55 text-white placeholder:text-slate-500"
+                disabled
                 id="demo-focus-session-tag"
                 name="tag"
                 readOnly
@@ -126,12 +136,13 @@ export default async function DemoFocusPage() {
 
             <div className="flex flex-col gap-3 xl:items-center">
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button className="w-full sm:w-auto" size="lg" type="button">
+                <Button className="w-full sm:w-auto" disabled size="lg" type="button">
                   <Play aria-hidden="true" className="size-4" />
                   {copy.start}
                 </Button>
                 <Button
                   className="w-full sm:w-auto"
+                  disabled
                   size="lg"
                   type="button"
                   variant="secondary"
@@ -154,6 +165,11 @@ export default async function DemoFocusPage() {
                     {locale === "ko"
                       ? "데모 전체보기는 UI만 보여 주며, 복귀 시 데모 대시보드로 돌아갑니다."
                       : "Demo full view is UI-only and returns to the demo dashboard."}
+                  </p>
+                  <p>
+                    {locale === "ko"
+                      ? "모드 탭, 태그 입력, 시작 버튼은 데모에서 비활성화되어 있습니다."
+                      : "Mode tabs, tag input, and timer controls are disabled in the demo."}
                   </p>
                 </div>
               </div>

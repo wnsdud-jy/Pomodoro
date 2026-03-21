@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Bell, RotateCcw, Save, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -20,6 +20,7 @@ import {
   POMODORO_SETTINGS_LIMITS,
 } from "@/lib/pomodoro-settings";
 import { parsePomodoroSettingsInput } from "@/lib/settings-validation";
+import { APP_TIME_ZONES, formatTimeZoneOptionLabel } from "@/lib/timezones";
 import type { AppDictionary } from "@/lib/i18n/messages";
 import type { PomodoroSettingsValues } from "@/types/settings";
 
@@ -34,13 +35,16 @@ type FormValues = {
   short_break_minutes: string;
   long_break_minutes: string;
   long_break_every: string;
+  timezone: string;
   auto_advance: boolean;
   auto_start_next: boolean;
   sound_enabled: boolean;
   notifications_enabled: boolean;
 };
 
-type FieldErrors = Partial<Record<NumericFieldKey, string>>;
+type FieldErrorKey = NumericFieldKey | "timezone";
+
+type FieldErrors = Partial<Record<FieldErrorKey, string>>;
 
 function buildFormValues(values: PomodoroSettingsValues): FormValues {
   return {
@@ -48,6 +52,7 @@ function buildFormValues(values: PomodoroSettingsValues): FormValues {
     short_break_minutes: String(values.short_break_minutes),
     long_break_minutes: String(values.long_break_minutes),
     long_break_every: String(values.long_break_every),
+    timezone: values.timezone,
     auto_advance: values.auto_advance,
     auto_start_next: values.auto_start_next,
     sound_enabled: values.sound_enabled,
@@ -68,15 +73,26 @@ function SettingsSwitchRow({
   label: string;
   onCheckedChange: (checked: boolean) => void;
 }) {
+  const switchId = useId();
+  const descriptionId = useId();
+
   return (
     <div className="flex items-start justify-between gap-4 rounded-[24px] border border-slate-200/80 bg-white/70 p-4 dark:border-white/10 dark:bg-slate-950/45">
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">{label}</p>
-        <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+        <p className="text-sm font-semibold text-slate-950 dark:text-slate-50" id={switchId}>
+          {label}
+        </p>
+        <p className="text-sm leading-6 text-slate-600 dark:text-slate-400" id={descriptionId}>
           {description}
         </p>
       </div>
-      <Switch checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
+      <Switch
+        aria-describedby={descriptionId}
+        aria-labelledby={switchId}
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onCheckedChange}
+      />
     </div>
   );
 }
@@ -101,10 +117,12 @@ function SummaryTile({
 }
 
 function getFieldErrorMessage(
-  key: NumericFieldKey,
+  key: FieldErrorKey,
   copy: AppDictionary["settingsPage"]["form"],
 ) {
   switch (key) {
+    case "timezone":
+      return copy.timeZoneError;
     case "focus_minutes":
       return copy.focusMinutesError;
     case "short_break_minutes":
@@ -160,24 +178,25 @@ export function SettingsForm({
   const currentSummary = useMemo(
     () => ({
       durations: copy.summaryDurationsTemplate
-        .replace("{focus}", String(initialValues.focus_minutes))
-        .replace("{short}", String(initialValues.short_break_minutes))
-        .replace("{long}", String(initialValues.long_break_minutes)),
+        .replace("{focus}", values.focus_minutes)
+        .replace("{short}", values.short_break_minutes)
+        .replace("{long}", values.long_break_minutes),
       cadence: copy.summaryCadenceTemplate.replace(
         "{count}",
-        String(initialValues.long_break_every),
+        values.long_break_every,
       ),
-      automation: initialValues.auto_advance
-        ? initialValues.auto_start_next
+      timeZone: formatTimeZoneOptionLabel(values.timezone),
+      automation: values.auto_advance
+        ? values.auto_start_next
           ? copy.summaryAutomationFull
           : copy.summaryAutomationSwitchOnly
         : copy.summaryAutomationManual,
       alerts:
-        initialValues.sound_enabled || initialValues.notifications_enabled
+        values.sound_enabled || values.notifications_enabled
           ? copy.summaryAlertsOn
           : copy.summaryAlertsOff,
     }),
-    [copy, initialValues],
+    [copy, values],
   );
   const isDirty = useMemo(
     () => JSON.stringify(parsePayload(values)) !== JSON.stringify(parsePayload(savedValues)),
@@ -190,6 +209,7 @@ export function SettingsForm({
       short_break_minutes: Number(currentValues.short_break_minutes),
       long_break_minutes: Number(currentValues.long_break_minutes),
       long_break_every: Number(currentValues.long_break_every),
+      timezone: currentValues.timezone,
       auto_advance: currentValues.auto_advance,
       auto_start_next: currentValues.auto_advance ? currentValues.auto_start_next : false,
       sound_enabled: currentValues.sound_enabled,
@@ -210,6 +230,7 @@ export function SettingsForm({
       const key = issue.path[0];
 
       if (
+        key === "timezone" ||
         key === "focus_minutes" ||
         key === "short_break_minutes" ||
         key === "long_break_minutes" ||
@@ -311,7 +332,7 @@ export function SettingsForm({
   }
 
   return (
-    <form className="space-y-6 pb-28" onSubmit={handleSubmit} ref={formRef}>
+    <form className="space-y-5 pb-32 sm:space-y-6 sm:pb-28" onSubmit={handleSubmit} ref={formRef}>
       <Card>
         <CardHeader className="space-y-3">
           <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-700 dark:bg-cyan-400/15 dark:text-cyan-300">
@@ -322,11 +343,52 @@ export function SettingsForm({
             <CardDescription>{copy.summaryDescription}</CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <SummaryTile label={copy.summaryDurationsLabel} value={currentSummary.durations} />
           <SummaryTile label={copy.summaryCadenceLabel} value={currentSummary.cadence} />
+          <SummaryTile label={copy.summaryTimeZoneLabel} value={currentSummary.timeZone} />
           <SummaryTile label={copy.summaryAutomationLabel} value={currentSummary.automation} />
           <SummaryTile label={copy.summaryAlertsLabel} value={currentSummary.alerts} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="space-y-3">
+          <CardTitle>{copy.timeZoneTitle}</CardTitle>
+          <CardDescription>{copy.timeZoneDescription}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-2">
+            <Label htmlFor="timezone">{copy.timeZoneLabel}</Label>
+            <select
+              aria-invalid={fieldErrors.timezone ? true : undefined}
+              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-slate-950 dark:text-slate-50"
+              id="timezone"
+              name="timezone"
+              onChange={(event) => {
+                const nextValues = {
+                  ...values,
+                  timezone: event.target.value,
+                };
+
+                setValues(nextValues);
+                setFieldErrors(validateValues(nextValues));
+              }}
+              value={values.timezone}
+            >
+              {APP_TIME_ZONES.map((timeZone) => (
+                <option key={timeZone} value={timeZone}>
+                  {formatTimeZoneOptionLabel(timeZone)}
+                </option>
+              ))}
+            </select>
+            <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
+              {copy.timeZoneHelp}
+            </p>
+            {fieldErrors.timezone ? (
+              <p className="text-sm text-rose-600 dark:text-rose-300">{fieldErrors.timezone}</p>
+            ) : null}
+          </div>
         </CardContent>
       </Card>
 
@@ -469,7 +531,7 @@ export function SettingsForm({
           <CardDescription>{copy.alertsDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
             <div className="space-y-4 rounded-[24px] border border-slate-200/80 bg-white/70 p-4 dark:border-white/10 dark:bg-slate-950/45">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-slate-50">
                 <Bell aria-hidden="true" className="size-4" />
@@ -518,18 +580,22 @@ export function SettingsForm({
       </Card>
 
       <div className="flex justify-end">
-        <Button onClick={handleRestoreDefaults} type="button" variant="ghost">
+        <Button className="w-full sm:w-auto" onClick={handleRestoreDefaults} type="button" variant="ghost">
           <RotateCcw aria-hidden="true" className="size-4" />
           {copy.restoreDefaults}
         </Button>
       </div>
 
       {isDirty ? (
-        <div className="pointer-events-none fixed bottom-4 right-4 z-40 sm:bottom-6 sm:right-6">
+        <div className="pointer-events-none fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:bottom-6 sm:right-6">
           <Button
-            className="pointer-events-auto h-12 rounded-full px-5 shadow-[0_16px_40px_-18px_rgba(15,23,42,0.45)]"
+            className="pointer-events-auto h-12 w-full rounded-full px-5 shadow-[0_16px_40px_-18px_rgba(15,23,42,0.45)] sm:w-auto"
             disabled={pending}
             size="lg"
+            style={{
+              marginLeft: "env(safe-area-inset-left)",
+              marginRight: "env(safe-area-inset-right)",
+            }}
             type="submit"
           >
             <Save aria-hidden="true" className="size-4" />

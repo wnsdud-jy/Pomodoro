@@ -1,4 +1,5 @@
 import type { PomodoroMode } from "@/lib/pomodoro";
+import { DEFAULT_APP_TIME_ZONE, normalizeTimeZone } from "@/lib/timezones";
 import type { PomodoroSettings, PomodoroSettingsValues } from "@/types/settings";
 
 export const POMODORO_SETTINGS_LIMITS = {
@@ -13,6 +14,7 @@ export const DEFAULT_POMODORO_SETTINGS_VALUES: PomodoroSettingsValues = {
   short_break_minutes: 5,
   long_break_minutes: 15,
   long_break_every: 4,
+  timezone: DEFAULT_APP_TIME_ZONE,
   auto_advance: true,
   auto_start_next: false,
   sound_enabled: true,
@@ -41,6 +43,7 @@ export function mergePomodoroSettings(
   return {
     ...defaults,
     ...settings,
+    timezone: normalizeTimeZone(settings.timezone),
     created_at: settings.created_at ?? defaults.created_at,
     updated_at: settings.updated_at ?? defaults.updated_at,
   };

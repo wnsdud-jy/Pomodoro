@@ -37,7 +37,7 @@ function FlowStat({
   return (
     <div
       className={cn(
-        "rounded-[24px] border p-4 shadow-sm transition-[transform,background-color,border-color]",
+        "rounded-[22px] border p-4 shadow-sm transition-[transform,background-color,border-color] sm:rounded-[24px]",
         tone === "accent"
           ? "border-teal-200/80 bg-teal-50/85 dark:border-teal-400/20 dark:bg-teal-500/10"
           : "border-slate-200/80 bg-white/70 dark:border-white/10 dark:bg-slate-950/45",
@@ -115,7 +115,7 @@ export function PomodoroTimer() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <Badge>{modeCopy[selectedMode].shortLabel}</Badge>
-            <CardTitle className="text-3xl text-balance md:text-4xl">
+            <CardTitle className="text-2xl text-balance sm:text-3xl md:text-4xl">
               {copy.title}
             </CardTitle>
             <CardDescription>{modeCopy[selectedMode].description}</CardDescription>
@@ -129,7 +129,6 @@ export function PomodoroTimer() {
             ) : null}
             <Button
               asChild
-              className="focus-visible:ring-0 focus-visible:ring-offset-0"
               size="sm"
               variant="secondary"
             >
@@ -176,7 +175,7 @@ export function PomodoroTimer() {
         </div>
 
         {pendingRecovery ? (
-          <div className="rounded-[24px] border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-900 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-100">
+          <div className="rounded-[22px] border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-900 sm:rounded-[24px] dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-100">
             <p className="font-semibold">{copy.recoveryTitle}</p>
             <p className="mt-1 leading-6">
               {formatTemplate(copy.recoveryDescriptionTemplate, {
@@ -197,17 +196,19 @@ export function PomodoroTimer() {
         ) : null}
 
         <Tabs onValueChange={handleModeChange} value={selectedMode}>
-          <TabsList className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="overflow-x-auto pb-1">
+            <TabsList className="flex min-w-max gap-2 rounded-[20px] p-1.5 sm:grid sm:min-w-0 sm:grid-cols-3 sm:gap-2">
             {MODE_ORDER.map((mode) => (
-               <TabsTrigger
-                 className="min-h-11 focus-visible:ring-0 focus-visible:ring-offset-0"
-                 key={mode}
-                 value={mode}
-               >
-                 {modeCopy[mode].label}
+              <TabsTrigger
+                className="min-h-11 min-w-[132px] px-4 sm:min-w-0"
+                key={mode}
+                value={mode}
+              >
+                {modeCopy[mode].label}
               </TabsTrigger>
             ))}
-          </TabsList>
+            </TabsList>
+          </div>
         </Tabs>
       </CardHeader>
 
@@ -225,7 +226,7 @@ export function PomodoroTimer() {
           title={completionTitle}
           tone={completionAlertTone}
         />
-        <div className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-100/70 p-6 dark:border-white/10 dark:bg-slate-950/55">
+        <div className="overflow-hidden rounded-[28px] border border-slate-200/50 bg-slate-100/70 p-5 sm:rounded-[32px] sm:p-6 dark:border-white/10 dark:bg-slate-950/55">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
               {copy.remainingTime}
@@ -234,13 +235,13 @@ export function PomodoroTimer() {
               {statusLabel}
             </p>
           </div>
-          <p className="mt-6 text-center font-mono text-[clamp(4rem,16vw,6.5rem)] font-semibold tracking-[-0.06em] text-slate-950 tabular-nums dark:text-slate-50">
+          <p className="mt-5 text-center font-mono text-[clamp(3.5rem,18vw,6.5rem)] font-semibold tracking-[-0.06em] text-slate-950 tabular-nums sm:mt-6 dark:text-slate-50">
             {formatSeconds(remainingSeconds)}
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
             {status === "running" ? (
               <Button
-                className="w-full sm:w-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="w-full sm:w-auto"
                 onClick={handlePause}
                 size="lg"
                 type="button"
@@ -250,7 +251,7 @@ export function PomodoroTimer() {
               </Button>
             ) : (
               <Button
-                className="w-full sm:w-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="w-full sm:w-auto"
                 onClick={handleStart}
                 size="lg"
                 type="button"
@@ -260,7 +261,7 @@ export function PomodoroTimer() {
               </Button>
             )}
             <Button
-              className="w-full sm:w-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="w-full sm:w-auto"
               onClick={() => resetTimer()}
               size="lg"
               type="button"
@@ -272,10 +273,9 @@ export function PomodoroTimer() {
           </div>
         </div>
 
-        <div className="space-y-3 rounded-[28px] border border-slate-200/80 bg-slate-50/80 p-5 dark:border-transparent dark:bg-slate-950/45">
+        <div className="space-y-3 rounded-[24px] border border-slate-200/80 bg-slate-50/80 p-4 sm:rounded-[28px] sm:p-5 dark:border-transparent dark:bg-slate-950/45">
           <Label htmlFor="session-tag">{copy.tagLabel}</Label>
           <Input
-            className="focus-visible:ring-0 focus-visible:ring-offset-0"
             autoComplete="off"
             disabled={isTagLocked}
             id="session-tag"

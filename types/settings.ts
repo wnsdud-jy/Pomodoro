@@ -3,6 +3,7 @@ export type PomodoroSettings = {
   short_break_minutes: number;
   long_break_minutes: number;
   long_break_every: number;
+  timezone: string;
   auto_advance: boolean;
   auto_start_next: boolean;
   sound_enabled: boolean;

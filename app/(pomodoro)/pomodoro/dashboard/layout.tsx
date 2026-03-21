@@ -1,6 +1,5 @@
 import { DashboardTimerProvider } from "@/app/pomodoro/dashboard/_components/dashboard-timer-provider";
 import { requireAuthSession } from "@/lib/auth/session";
-import { serverEnv } from "@/lib/env";
 import { formatDateKey, getTodayDateKey } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/messages";
 import { getFocusStreakSinceLongBreak } from "@/lib/pomodoro-flow";
@@ -61,16 +60,22 @@ export default async function DashboardLayout({
     ),
   ).slice(0, 5);
   const nowIso = new Date().toISOString();
-  const todayKey = getTodayDateKey(serverEnv.APP_TIMEZONE);
-  const initialTodayFocusCount = completedSessions.filter(
-    (session) =>
-      session.mode === "focus" &&
-      formatDateKey(session.ended_at, serverEnv.APP_TIMEZONE) === todayKey,
-  ).length;
-  const initialDailyFocusStreak = buildFocusStreakSummary(completedSessions, {
-    nowIso,
-    timeZone: serverEnv.APP_TIMEZONE,
-  }).currentStreak;
+  const todayKey =
+    settingsResult.status === "fulfilled" ? getTodayDateKey(settings.timezone) : null;
+  const initialTodayFocusCount = todayKey
+    ? completedSessions.filter(
+        (session) =>
+          session.mode === "focus" &&
+          formatDateKey(session.ended_at, settings.timezone) === todayKey,
+      ).length
+    : 0;
+  const initialDailyFocusStreak =
+    settingsResult.status === "fulfilled"
+      ? buildFocusStreakSummary(completedSessions, {
+          nowIso,
+          timeZone: settings.timezone,
+        }).currentStreak
+      : 0;
 
   return (
     <DashboardTimerProvider

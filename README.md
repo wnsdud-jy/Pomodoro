@@ -1,114 +1,150 @@
 # Pomodoro
 
-Pomodoro is a single-user Pomodoro timer app built with Next.js. It provides authenticated access, configurable session flows, persisted focus history, and bilingual (Korean/English) support.
+Pomodoro is a personal Pomodoro timer built with Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, and Supabase. It is designed for a single authenticated owner today, while the database layer is now user-scoped and ready for RLS-based access control.
 
-> [!NOTE]
-> No logo or icon file was found in this repository, so the README uses text-only branding in the header.
+## Overview
 
-## Highlights
-
-- Single-user authentication using credentials in environment variables
-- Session modes: `focus`, `short_break`, `long_break`
-- End-time-based countdown logic for better accuracy during tab delays
-- Optional automatic session transitions and optional automatic next-session start
-- Session tagging and server-side persisted logs
-- Focus/休? maybe remove Chinese. continue:
-- Dashboard and focus-only full-screen timer view
-- History filters, analytics cards, and CSV export
-- Sound and browser notification options
-- Korean / English UI language and light / dark theme preferences
+- Supabase Auth email/password sign-in
+- Protected dashboard, history, and settings pages
+- Focus, short break, and long break timer modes
+- Session history with filters, analytics, and CSV export
+- Per-user preferences for locale, theme, and timer settings
+- Public demo routes that do not expose authenticated data
 
 ## Tech Stack
 
-- Next.js 16 (App Router), React 19, TypeScript
-- Tailwind CSS and shadcn/ui components
-- Supabase (PostgreSQL + server-side API via service role key)
-- Zod validation for server payload safety
+- Next.js 16 App Router
+- React 19
+- TypeScript (strict)
+- Tailwind CSS 4
+- shadcn/ui
+- Supabase Auth + Postgres + Row Level Security
+- Zod
 
-## Prerequisites
+## Requirements
 
 - Node.js 20+
 - npm
-- Supabase project and DB access
+- A Supabase project
 
-## Quick Start
+## Getting Started
+
+### 1. Install dependencies
 
 ```bash
 npm install
+```
+
+### 2. Configure environment variables
+
+Copy `.env.example` to `.env.local` and fill in the values:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+APP_TIMEZONE=Asia/Seoul
+```
+
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` is intended for browser use. Do not use a service-role key in normal application flows.
+
+### 3. Create the Auth user
+
+This app now signs in through Supabase Auth, not the old `.env` credential pair.
+
+1. Open Supabase Dashboard.
+2. Go to `Authentication` -> `Users`.
+3. Click `Add user`.
+4. Enter the email and password you want to use for `/pomodoro/login`.
+5. Enable auto-confirm if you want password login to work immediately without email verification.
+
+### 4. Apply the database SQL
+
+Choose the path that matches your database state.
+
+#### Fresh database
+
+If the Pomodoro tables do not exist yet, run:
+
+- `supabase/schema.sql`
+
+This creates the current per-user tables:
+
+- `sessions`
+- `app_preferences`
+- `settings`
+
+#### Existing database with legacy tables
+
+If you already have the old schema, do not run `supabase/schema.sql` first.
+
+1. Create the single Supabase Auth user.
+2. Run `supabase/migrations/20260321_supabase_auth_rls.sql`.
+
+That migration:
+
+- adds `user_id` ownership to legacy rows
+- converts singleton preferences and settings rows into per-user rows
+- backfills existing data to the single Auth user
+- recreates indexes
+- installs RLS policies
+
+Important: the migration assumes there is exactly one row in `auth.users` for the legacy backfill.
+
+### 5. Run the app
+
+```bash
 cp .env.example .env.local
 npm run dev
 ```
 
 Open:
 
-- `http://localhost:3000/pomodoro/login` (entry point, root `/` redirects here)
-- `http://localhost:3000/pomodoro/dashboard`
+- `http://localhost:3000/` -> redirects to `/pomodoro/login`
+- `http://localhost:3000/pomodoro/login`
 
-## Environment Variables
+## Route Map
 
-Define the following in `.env.local`:
-
-```bash
-APP_LOGIN_ID=admin
-APP_LOGIN_PASSWORD=change-me-please
-SESSION_SECRET=replace-with-a-long-random-string-at-least-32-chars
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-APP_TIMEZONE=Asia/Seoul
-```
-
-## Database Setup
-
-Apply `supabase/schema.sql` in the Supabase SQL editor.  
-The schema creates:
-
-- `sessions`: completed timer records (`focus`, `short_break`, `long_break`) with start/end time, duration and tag
-- `app_preferences`: singleton row for persisted locale/theme
-- `settings`: singleton row for timer settings (minutes, auto-switch, notifications)
-
-## Routes and Endpoints
-
-### Public
+### Public routes
 
 - `GET /pomodoro/login`
+- `GET /pomodoro/demo`
+- `GET /pomodoro/demo/focus`
+- `GET /pomodoro/demo/history`
+- `GET /pomodoro/demo/settings`
 
-### Protected
+### Protected routes
 
 - `GET /pomodoro/dashboard`
 - `GET /pomodoro/dashboard/focus`
 - `GET /pomodoro/history`
 - `GET /pomodoro/settings`
 
-All paths under `/pomodoro` are guarded by a server-side auth check.
+Protected pages are gated in `proxy.ts` and checked again on the server with the authenticated Supabase user.
 
-### Internal API
+### Internal API routes
 
 - `GET /pomodoro/api/settings`
 - `POST /pomodoro/api/settings`
 - `POST /pomodoro/api/sessions`
+- `PATCH /pomodoro/api/sessions`
 - `DELETE /pomodoro/api/sessions?id={id}`
-- `GET /pomodoro/api/history/export`
 - `POST /pomodoro/api/preferences`
+- `GET /pomodoro/api/history/export`
 
 ## Project Structure
 
 ```text
 app/
-  page.tsx
   layout.tsx
-  globals.css
+  page.tsx
   pomodoro/
-    layout.tsx
-    login/page.tsx
-    dashboard/...
-    history/...
-    settings/...
+    login/
+    demo/
     api/
-      preferences/route.ts
-      settings/route.ts
-      sessions/route.ts
-      history/export/route.ts
-  (pomodoro)/pomodoro/...
+  (pomodoro)/pomodoro/
+    dashboard/
+    history/
+    settings/
 
 components/
   layout/
@@ -116,40 +152,57 @@ components/
 
 lib/
   auth/
-  browser/
   i18n/
-  pomodoro*.ts
-  session-*.ts
-  supabase/
   preferences/
+  supabase/
 
-supabase/schema.sql
+supabase/
+  schema.sql
+  migrations/
 ```
 
-## Behavior Notes
+## Auth and Data Access
 
-- Authentication uses `app`-scoped HttpOnly session cookies and HMAC/constant-time credential verification.
-- Supabase queries are executed with the server-side service role key only.
-- Notification sounds and browser Notification API are optional and reflect runtime permission state.
+- Auth uses Supabase SSR clients and cookie-based session refresh.
+- Server components and route handlers resolve the current user with `auth.getUser()`.
+- Normal reads and writes are scoped by `user_id`.
+- The request path no longer depends on the service-role key.
 
-> [!IMPORTANT]
-> Keep `SUPABASE_SERVICE_ROLE_KEY` and `SESSION_SECRET` server-only.
+## Commands
 
-## Useful Scripts
-
-- `npm run dev` - start dev server
-- `npm run build` - production build
-- `npm run start` - run production server
+- `npm run dev` - start the development server
+- `npm run build` - run the production build
+- `npm run start` - start the production server
 - `npm run lint` - run ESLint
 
-## Deployment
+## Validation
 
-- Recommended platform: Vercel
-- Set all environment variables in deployment settings
-- Ensure HTTPS in production for secure cookie behavior
+Before opening a PR, run:
+
+```bash
+npm run lint
+npm run build
+```
 
 ## Troubleshooting
 
-> [!TIP]
-> If data fails to load on dashboard/history, first check `.env.local` values and confirm the Supabase tables are created.
+### `column "user_id" does not exist`
 
+You are probably applying `supabase/schema.sql` to a legacy database. Create the Auth user first, then use `supabase/migrations/20260321_supabase_auth_rls.sql`.
+
+### Login fails
+
+Check the following:
+
+- the Supabase Auth user exists
+- the email and password match the created user
+- `NEXT_PUBLIC_SUPABASE_URL` is correct
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` is correct
+
+### Protected pages show empty data
+
+Check the following:
+
+- the migration finished successfully
+- legacy rows were backfilled to the Auth user
+- the logged-in user is the same user that owns the data

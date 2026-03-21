@@ -1,119 +1,150 @@
 # Pomodoro
 
-Pomodoro는 개인 단일 사용자를 대상으로 한 뽀모도로 타이머 앱입니다.  
-Next.js(App Router), TypeScript, Tailwind CSS, shadcn/ui, Supabase를 기반으로 만들었습니다.
+Pomodoro는 개인용 뽀모도로 타이머 앱입니다. Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, Supabase를 기반으로 만들었고, 현재는 한 명의 인증된 사용자가 사용하는 흐름에 맞춰져 있습니다. 다만 데이터베이스 구조는 이미 `user_id` 기준으로 정리되어 있어서 RLS 기반 사용자 격리 구조를 그대로 확장할 수 있습니다.
 
-> [!NOTE]
-> 저장소에 로고/아이콘 파일이 없어 헤더는 텍스트 브랜딩으로 작성했습니다.
+## 개요
 
-## 핵심 기능
+- Supabase Auth 이메일/비밀번호 로그인
+- 대시보드, 기록, 설정 보호 페이지
+- `focus`, `short_break`, `long_break` 타이머 모드
+- 필터, 통계, CSV 내보내기가 있는 기록 화면
+- 사용자별 언어, 테마, 타이머 설정 저장
+- 인증 데이터를 노출하지 않는 공개 데모 라우트
 
-- 단일 사용자 로그인
-  - `.env`의 `APP_LOGIN_ID` / `APP_LOGIN_PASSWORD`를 통한 인증
-  - 로그인 성공 시 HttpOnly 세션 쿠키 발급
-  - 보호 라우트 접근 시 세션 검사
-- 타이머 엔진
-  - 모드: `focus` / `short_break` / `long_break`
-  - 종료 시각 기반 카운트다운으로 탭 정지/지연에 강함
-  - 세션 자동 전환, 다음 세션 자동 시작(옵션)
-  - `today` 기준 요약과 최근 기록 미리보기
-- 기록/통계
-  - 기간 필터(전체/오늘/최근 7일/최근 30일)
-  - 모드 필터 및 태그 검색
-  - 특정 날짜 필터
-  - 요약(오늘/이번 주/이번 달), 최근 추이(7일/30일), 요일 요약
-  - 태그 랭킹
-- 알림 및 UX
-  - 브라우저 알림(Notification API) 토글
-  - 알림음 토글
-  - 문서 제목에 남은 시간과 현재 모드 반영
-- 설정
-  - 집중/짧은 휴식/긴 휴식 시간
-  - 긴 휴식 주기(`long_break_every`)
-  - 자동 전환/자동 시작
-  - 소리·알림 선호도
-  - 테마(라이트/다크), 언어(한국어/영어) 저장
-- 데이터 내보내기
-  - 필터 조건 기반 CSV 다운로드
+## 기술 스택
 
-## 프로젝트 실행
+- Next.js 16 App Router
+- React 19
+- TypeScript (strict)
+- Tailwind CSS 4
+- shadcn/ui
+- Supabase Auth + Postgres + Row Level Security
+- Zod
+
+## 요구 사항
+
+- Node.js 20+
+- npm
+- Supabase 프로젝트
+
+## 시작하기
+
+### 1. 의존성 설치
 
 ```bash
 npm install
+```
+
+### 2. 환경 변수 설정
+
+`.env.example`을 `.env.local`로 복사한 뒤 값을 채우세요.
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+APP_TIMEZONE=Asia/Seoul
+```
+
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`는 브라우저에서 사용하는 공개 키입니다. 일반 앱 요청 경로에는 서비스 롤 키를 사용하지 않습니다.
+
+### 3. Auth 사용자 만들기
+
+이제 `/pomodoro/login`은 예전 `.env` 자격 증명이 아니라 Supabase Auth 계정으로 로그인합니다.
+
+1. Supabase Dashboard를 엽니다.
+2. `Authentication` -> `Users`로 이동합니다.
+3. `Add user`를 클릭합니다.
+4. `/pomodoro/login`에 사용할 이메일과 비밀번호를 입력합니다.
+5. 이메일 확인 없이 바로 로그인하려면 auto-confirm를 켭니다.
+
+### 4. 데이터베이스 SQL 적용
+
+현재 DB 상태에 따라 경로가 다릅니다.
+
+#### 새 데이터베이스
+
+Pomodoro 테이블이 아직 없다면 아래 파일만 실행하세요.
+
+- `supabase/schema.sql`
+
+이 파일은 현재 기준의 사용자별 테이블을 만듭니다.
+
+- `sessions`
+- `app_preferences`
+- `settings`
+
+#### 기존 데이터베이스 업그레이드
+
+예전 스키마가 이미 있다면 `supabase/schema.sql`을 먼저 실행하면 안 됩니다.
+
+1. Supabase Auth 사용자 1명을 만듭니다.
+2. `supabase/migrations/20260321_supabase_auth_rls.sql`을 실행합니다.
+
+이 마이그레이션은 다음 작업을 수행합니다.
+
+- 기존 데이터에 `user_id`를 추가
+- 단일행이던 preferences/settings를 사용자별 행으로 전환
+- 기존 데이터를 하나의 Auth 사용자에게 백필
+- 인덱스 재생성
+- RLS 정책 적용
+
+중요: 이 마이그레이션은 `auth.users`에 정확히 1명의 사용자가 있다고 가정합니다.
+
+### 5. 앱 실행
+
+```bash
 cp .env.example .env.local
 npm run dev
 ```
 
-- `http://localhost:3000`은 로그인 페이지(`/pomodoro/login`)로 리다이렉트됩니다.
-- 기본 진입 페이지: `http://localhost:3000/pomodoro/login`
-- 대시보드: `http://localhost:3000/pomodoro/dashboard`
+열어볼 주소:
 
-## 환경 변수
+- `http://localhost:3000/` -> `/pomodoro/login`으로 리다이렉트
+- `http://localhost:3000/pomodoro/login`
 
-`.env.local` 예시:
-
-```bash
-APP_LOGIN_ID=admin
-APP_LOGIN_PASSWORD=change-me-please
-SESSION_SECRET=replace-with-a-long-random-string-at-least-32-chars
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-APP_TIMEZONE=Asia/Seoul
-```
-
-## DB 스키마
-
-`supabase/schema.sql`을 Supabase SQL Editor에서 실행하세요.
-
-- `sessions`  
-  - 완료 세션(`completed = true`) 저장
-  - `mode`, `tag`, `duration_seconds`, `started_at`, `ended_at`
-- `app_preferences`  
-  - 단일행(`id = 'singleton'`)으로 `locale`, `theme` 저장
-- `settings`  
-  - 단일행(`id = 'singleton'`)으로 타이머 설정 저장
-
-## 라우트 및 API
+## 라우트 구성
 
 ### 공개 라우트
 
 - `GET /pomodoro/login`
+- `GET /pomodoro/demo`
+- `GET /pomodoro/demo/focus`
+- `GET /pomodoro/demo/history`
+- `GET /pomodoro/demo/settings`
 
-### 보호 라우트(로그인 필요)
+### 보호 라우트
 
 - `GET /pomodoro/dashboard`
 - `GET /pomodoro/dashboard/focus`
 - `GET /pomodoro/history`
 - `GET /pomodoro/settings`
 
-### 내부 API
+보호 페이지는 `proxy.ts`에서 1차로 막고, 서버 컴포넌트와 라우트 핸들러에서 인증된 Supabase 사용자로 다시 확인합니다.
+
+### 내부 API 라우트
 
 - `GET /pomodoro/api/settings`
 - `POST /pomodoro/api/settings`
 - `POST /pomodoro/api/sessions`
+- `PATCH /pomodoro/api/sessions`
 - `DELETE /pomodoro/api/sessions?id={id}`
-- `GET /pomodoro/api/history/export`
 - `POST /pomodoro/api/preferences`
+- `GET /pomodoro/api/history/export`
 
-## 폴더 구조
+## 프로젝트 구조
 
 ```text
 app/
-  page.tsx
   layout.tsx
-  globals.css
+  page.tsx
   pomodoro/
-    layout.tsx
-    login/page.tsx
-    dashboard/...
-    history/...
-    settings/...
+    login/
+    demo/
     api/
-      preferences/route.ts
-      sessions/route.ts
-      settings/route.ts
-      history/export/route.ts
-  (pomodoro)/pomodoro/...
+  (pomodoro)/pomodoro/
+    dashboard/
+    history/
+    settings/
 
 components/
   layout/
@@ -121,43 +152,57 @@ components/
 
 lib/
   auth/
-  browser/
   i18n/
-  pomodoro*.ts
-  session-*.ts
-  supabase/
   preferences/
+  supabase/
 
-types/
-  session.ts
-  settings.ts
-
-supabase/schema.sql
+supabase/
+  schema.sql
+  migrations/
 ```
 
-## 동작 노트
+## 인증과 데이터 접근 방식
 
-- 인증은 서버 측 세션 쿠키와 `crypto.timingSafeEqual` 기반 자격 증명 비교로 처리합니다.
-- Supabase 호출은 서버 전용 클라이언트에서만 수행합니다.
-- 알림 권한은 브라우저 상태에 따라 동작이 달라집니다.
+- 인증은 Supabase SSR 클라이언트와 쿠키 기반 세션 갱신으로 처리합니다.
+- 서버 컴포넌트와 API 라우트는 `auth.getUser()`로 현재 사용자를 확인합니다.
+- 일반 데이터 조회와 저장은 `user_id` 기준으로 제한됩니다.
+- 일반 앱 요청 경로는 서비스 롤 키에 의존하지 않습니다.
 
-> [!IMPORTANT]
-> `SUPABASE_SERVICE_ROLE_KEY`와 `SESSION_SECRET`은 클라이언트로 노출되지 않도록 환경변수로만 관리합니다.
+## 명령어
 
-## 스크립트
+- `npm run dev` - 개발 서버 실행
+- `npm run build` - 프로덕션 빌드 실행
+- `npm run start` - 프로덕션 서버 실행
+- `npm run lint` - ESLint 실행
 
-- `npm run dev`
-- `npm run build`
-- `npm run start`
-- `npm run lint`
+## 검증
 
-## 배포(Vercel)
+PR 전에 아래 명령을 실행하세요.
 
-- Vercel 환경변수에 동일한 값 등록
-- `next build` 기반 배포
-- 운영 환경 HTTPS 사용 권장(쿠키/세션 안정성)
+```bash
+npm run lint
+npm run build
+```
 
 ## 트러블슈팅
 
-> [!TIP]
-> 대시보드/기록에서 데이터가 비어 있거나 에러가 나는 경우 `.env.local` 값, Supabase 스키마 적용 여부, `sessions`/`settings` 조회 권한을 먼저 확인하세요.
+### `column "user_id" does not exist`
+
+기존 DB에 `supabase/schema.sql`을 직접 적용한 경우일 가능성이 높습니다. Auth 사용자를 먼저 만든 뒤 `supabase/migrations/20260321_supabase_auth_rls.sql`을 사용하세요.
+
+### 로그인 실패
+
+아래를 확인하세요.
+
+- Supabase Auth 사용자가 실제로 만들어졌는지
+- 입력한 이메일과 비밀번호가 그 사용자와 일치하는지
+- `NEXT_PUBLIC_SUPABASE_URL` 값이 올바른지
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` 값이 올바른지
+
+### 보호 페이지에 데이터가 보이지 않음
+
+아래를 확인하세요.
+
+- 마이그레이션이 정상 완료됐는지
+- 기존 데이터가 Auth 사용자에게 백필됐는지
+- 현재 로그인한 사용자가 실제 데이터 소유자인지

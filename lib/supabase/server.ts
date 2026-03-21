@@ -1,30 +1,44 @@
 import "server-only";
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+
+import { cookies } from "next/headers";
 
 import { serverEnv } from "@/lib/env";
 
-let supabaseAdminClient: SupabaseClient | undefined;
+export async function createSupabaseServerClient() {
+  const cookieStore = await cookies();
 
-export function getSupabaseAdminClient() {
-  if (!supabaseAdminClient) {
-    supabaseAdminClient = createClient(
-      serverEnv.SUPABASE_URL,
-      serverEnv.SUPABASE_SERVICE_ROLE_KEY,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
+  return createServerClient(
+    serverEnv.NEXT_PUBLIC_SUPABASE_URL,
+    serverEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
         },
-        global: {
-          headers: {
-            "X-Client-Info": "pomodoro-mvp",
-          },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message.includes("Cookies can only be modified")
+            ) {
+              return;
+            }
+
+            throw error;
+          }
         },
       },
-    );
-  }
-
-  return supabaseAdminClient;
+      global: {
+        headers: {
+          "X-Client-Info": "pomodoro-mvp",
+        },
+      },
+    },
+  );
 }
-

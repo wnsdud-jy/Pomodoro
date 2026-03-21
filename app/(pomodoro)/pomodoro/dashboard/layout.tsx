@@ -1,4 +1,5 @@
 import { DashboardTimerProvider } from "@/app/pomodoro/dashboard/_components/dashboard-timer-provider";
+import { requireAuthSession } from "@/lib/auth/session";
 import { serverEnv } from "@/lib/env";
 import { formatDateKey, getTodayDateKey } from "@/lib/format";
 import { getDictionary } from "@/lib/i18n/messages";
@@ -13,13 +14,14 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await requireAuthSession();
   const { locale } = await getRequestPreferences();
   const dictionary = getDictionary(locale);
 
   const [recentSessionsResult, settingsResult, completedSessionsResult] = await Promise.allSettled([
-    getRecentSessions(24),
-    getPomodoroSettings(),
-    getCompletedSessions(),
+    getRecentSessions(session.supabase, session.user.id, 24),
+    getPomodoroSettings(session.supabase, session.user.id),
+    getCompletedSessions(session.supabase, session.user.id),
   ]);
 
   if (recentSessionsResult.status === "rejected") {

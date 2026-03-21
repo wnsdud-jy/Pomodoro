@@ -1,5 +1,4 @@
 export type PomodoroSettings = {
-  id: "singleton";
   focus_minutes: number;
   short_break_minutes: number;
   long_break_minutes: number;
@@ -14,5 +13,5 @@ export type PomodoroSettings = {
 
 export type PomodoroSettingsValues = Omit<
   PomodoroSettings,
-  "id" | "created_at" | "updated_at"
+  "created_at" | "updated_at"
 >;

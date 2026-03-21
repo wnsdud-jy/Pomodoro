@@ -2,10 +2,9 @@
 
 import { redirect } from "next/navigation";
 
-import { clearSessionCookie } from "@/lib/auth/session";
+import { signOut } from "@/lib/auth/session";
 
 export async function logoutAction() {
-  await clearSessionCookie();
+  await signOut();
   redirect("/pomodoro/login");
 }
-

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { HistoryView } from "@/app/pomodoro/history/_components/history-view";
+import { requireAuthSession } from "@/lib/auth/session";
 import { serverEnv } from "@/lib/env";
 import { getDictionary } from "@/lib/i18n/messages";
 import { getRequestPreferences } from "@/lib/preferences/server";
@@ -27,6 +28,7 @@ export default async function HistoryPage({
     date?: string;
   }>;
 }) {
+  const session = await requireAuthSession();
   const { locale } = await getRequestPreferences();
   const dictionary = getDictionary(locale);
   const resolvedSearchParams = await searchParams;
@@ -43,7 +45,7 @@ export default async function HistoryPage({
   let historyWarning: string | null = null;
 
   try {
-    sessions = await getCompletedSessions();
+    sessions = await getCompletedSessions(session.supabase, session.user.id);
   } catch (error) {
     console.error("Failed to load history sessions", error);
     historyWarning = dictionary.history.warnings.sessions;

@@ -19,7 +19,7 @@ export async function GET() {
   }
 
   try {
-    const settings = await getPomodoroSettings();
+    const settings = await getPomodoroSettings(session.supabase, session.user.id);
     return NextResponse.json({ data: settings }, { status: 200 });
   } catch (error) {
     const message =
@@ -57,7 +57,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const settings = await upsertPomodoroSettings(parsed.data);
+    const settings = await upsertPomodoroSettings(
+      session.supabase,
+      session.user.id,
+      parsed.data,
+    );
     revalidatePath(DASHBOARD_PATH);
     revalidatePath(HISTORY_PATH);
     revalidatePath(SETTINGS_PATH);

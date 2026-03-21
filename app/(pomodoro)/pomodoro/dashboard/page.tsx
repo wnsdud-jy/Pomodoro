@@ -5,6 +5,7 @@ import { PomodoroTimer } from "@/app/pomodoro/dashboard/_components/pomodoro-tim
 import { RecentSessions } from "@/app/pomodoro/dashboard/_components/recent-sessions";
 import { TodayFocusCard } from "@/app/pomodoro/dashboard/_components/today-focus-card";
 import { HISTORY_PATH } from "@/lib/auth/constants";
+import { requireAuthSession } from "@/lib/auth/session";
 import { serverEnv } from "@/lib/env";
 import { getDictionary } from "@/lib/i18n/messages";
 import { getRequestPreferences } from "@/lib/preferences/server";
@@ -16,12 +17,13 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
+  const session = await requireAuthSession();
   const { locale } = await getRequestPreferences();
   const dictionary = getDictionary(locale);
   const nowIso = new Date().toISOString();
   const [recentSessionsResult, todaySummarySourceResult] = await Promise.allSettled([
-    getRecentSessions(24),
-    getCompletedSessions(),
+    getRecentSessions(session.supabase, session.user.id, 24),
+    getCompletedSessions(session.supabase, session.user.id),
   ]);
   const dashboardWarnings: string[] = [];
 

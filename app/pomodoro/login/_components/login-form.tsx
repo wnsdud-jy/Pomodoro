@@ -35,26 +35,27 @@ export function LoginForm({
   copy: AppDictionary["login"]["form"];
 }) {
   const [state, formAction] = useActionState(loginAction, initialState);
-  const loginIdRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (state.error) {
-      loginIdRef.current?.focus();
+      emailRef.current?.focus();
     }
   }, [state.error]);
 
   return (
     <form action={formAction} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="loginId">{copy.loginIdLabel}</Label>
+        <Label htmlFor="email">{copy.emailLabel}</Label>
         <Input
-          autoComplete="username"
-          id="loginId"
-          name="loginId"
-          placeholder={copy.loginIdPlaceholder}
-          ref={loginIdRef}
+          autoComplete="email"
+          id="email"
+          name="email"
+          placeholder={copy.emailPlaceholder}
+          ref={emailRef}
           spellCheck={false}
           required
+          type="email"
         />
       </div>
       <div className="space-y-2">

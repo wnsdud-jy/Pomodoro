@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   title: "Login",
 };
 
+export const dynamic = "force-dynamic";
+
 const GITHUB_REPOSITORY_URL = "https://github.com/wnsdud-jy/Pomodoro";
 
 export default async function LoginPage() {

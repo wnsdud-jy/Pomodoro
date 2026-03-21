@@ -1,19 +1,41 @@
 import { z } from "zod";
 
 const serverEnvSchema = z.object({
-  APP_LOGIN_ID: z.string().min(1),
-  APP_LOGIN_PASSWORD: z.string().min(1),
-  SESSION_SECRET: z.string().min(32),
-  SUPABASE_URL: z.string().url(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
   APP_TIMEZONE: z.string().min(1).default("Asia/Seoul"),
 });
 
-export const serverEnv = serverEnvSchema.parse({
-  APP_LOGIN_ID: process.env.APP_LOGIN_ID,
-  APP_LOGIN_PASSWORD: process.env.APP_LOGIN_PASSWORD,
-  SESSION_SECRET: process.env.SESSION_SECRET,
-  SUPABASE_URL: process.env.SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  APP_TIMEZONE: process.env.APP_TIMEZONE ?? "Asia/Seoul",
-});
+type ServerEnv = z.infer<typeof serverEnvSchema>;
+
+let cachedServerEnv: ServerEnv | undefined;
+
+function getServerEnv() {
+  if (!cachedServerEnv) {
+    cachedServerEnv = serverEnvSchema.parse({
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      APP_TIMEZONE: process.env.APP_TIMEZONE ?? "Asia/Seoul",
+    });
+  }
+
+  return cachedServerEnv;
+}
+
+export function hasSupabaseAuthEnv() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
+}
+
+export const serverEnv = {
+  get NEXT_PUBLIC_SUPABASE_URL() {
+    return getServerEnv().NEXT_PUBLIC_SUPABASE_URL;
+  },
+  get NEXT_PUBLIC_SUPABASE_ANON_KEY() {
+    return getServerEnv().NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  },
+  get APP_TIMEZONE() {
+    return getServerEnv().APP_TIMEZONE;
+  },
+};

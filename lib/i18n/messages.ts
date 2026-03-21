@@ -31,8 +31,8 @@ export const dictionaries = {
       retry: "다시 시도",
     },
     auth: {
-      requiredCredentials: "아이디와 비밀번호를 입력해 주세요.",
-      invalidCredentials: "아이디 또는 비밀번호가 올바르지 않습니다.",
+      requiredCredentials: "이메일과 비밀번호를 입력해 주세요.",
+      invalidCredentials: "이메일 또는 비밀번호가 올바르지 않습니다.",
     },
     login: {
       badge: "Private Focus System",
@@ -48,11 +48,11 @@ export const dictionaries = {
       cardRoute: "/pomodoro/login",
       cardTitle: "로그인",
       cardDescription:
-        "회원가입 없이 `.env`에 등록된 계정으로만 접근할 수 있습니다.",
+        "Supabase Auth에 등록된 이메일 계정으로만 접근할 수 있습니다.",
       form: {
-        loginIdLabel: "아이디",
+        emailLabel: "이메일",
         passwordLabel: "비밀번호",
-        loginIdPlaceholder: "등록한 아이디 입력…",
+        emailPlaceholder: "등록한 이메일 입력…",
         passwordPlaceholder: "등록한 비밀번호 입력…",
         submit: "로그인",
         submitting: "로그인 중…",
@@ -63,7 +63,7 @@ export const dictionaries = {
         recent:
           "최근 기록 미리보기를 불러오지 못했습니다. Supabase 연결과 환경변수를 확인해 주세요.",
         summary:
-          "오늘 요약을 계산하지 못했습니다. `SUPABASE_URL`과 `SUPABASE_SERVICE_ROLE_KEY`를 확인해 주세요.",
+          "오늘 요약을 계산하지 못했습니다. `NEXT_PUBLIC_SUPABASE_URL`과 `NEXT_PUBLIC_SUPABASE_ANON_KEY`를 확인해 주세요.",
         settings:
           "저장된 타이머 설정을 불러오지 못해 기본값으로 표시하고 있습니다.",
       },
@@ -391,8 +391,8 @@ export const dictionaries = {
       retry: "Try again",
     },
     auth: {
-      requiredCredentials: "Enter both your login ID and password.",
-      invalidCredentials: "The login ID or password is incorrect.",
+      requiredCredentials: "Enter both your email address and password.",
+      invalidCredentials: "The email address or password is incorrect.",
     },
     login: {
       badge: "Private Focus System",
@@ -408,11 +408,11 @@ export const dictionaries = {
       cardRoute: "/pomodoro/login",
       cardTitle: "Login",
       cardDescription:
-        "Access is limited to the credentials stored in your `.env` file.",
+        "Access is limited to the email account registered in Supabase Auth.",
       form: {
-        loginIdLabel: "Login ID",
+        emailLabel: "Email",
         passwordLabel: "Password",
-        loginIdPlaceholder: "Enter your login ID…",
+        emailPlaceholder: "Enter your email address…",
         passwordPlaceholder: "Enter your password…",
         submit: "Log in",
         submitting: "Signing in…",
@@ -423,7 +423,7 @@ export const dictionaries = {
         recent:
           "The recent-session preview could not be loaded. Check your Supabase connection and environment variables.",
         summary:
-          "Today’s summary could not be calculated. Verify `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.",
+          "Today’s summary could not be calculated. Verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.",
         settings:
           "Saved timer settings could not be loaded, so the dashboard is using defaults.",
       },

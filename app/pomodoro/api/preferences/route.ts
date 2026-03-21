@@ -51,7 +51,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const preferences = await upsertPersistedPreferences(parsed.data);
+    const preferences = await upsertPersistedPreferences(
+      session.supabase,
+      session.user.id,
+      parsed.data,
+    );
 
     if (parsed.data.locale) {
       cookieStore.set({

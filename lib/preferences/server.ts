@@ -2,6 +2,8 @@ import "server-only";
 
 import { cookies } from "next/headers";
 
+import { getAuthSession } from "@/lib/auth/session";
+import { hasSupabaseAuthEnv } from "@/lib/env";
 import {
   DEFAULT_APP_LOCALE,
   DEFAULT_APP_THEME,
@@ -29,10 +31,19 @@ export async function getRequestPreferences() {
 
   let persistedPreferences = null;
 
-  try {
-    persistedPreferences = await getPersistedPreferences();
-  } catch (error) {
-    console.error("Failed to load persisted app preferences", error);
+  if (hasSupabaseAuthEnv()) {
+    try {
+      const authSession = await getAuthSession();
+
+      if (authSession) {
+        persistedPreferences = await getPersistedPreferences(
+          authSession.supabase,
+          authSession.user.id,
+        );
+      }
+    } catch (error) {
+      console.error("Failed to load persisted app preferences", error);
+    }
   }
 
   return {

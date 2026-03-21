@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { exitBrowserFullscreen, isBrowserFullscreenActive } from "@/lib/browser/fullscreen";
 import { formatSeconds } from "@/lib/format";
 import { MODE_ORDER } from "@/lib/pomodoro";
 import { cn } from "@/lib/utils";
@@ -83,6 +84,10 @@ export function FocusTimerScreen() {
       document.body.style.overflow = previousOverflow;
       document.body.style.overscrollBehavior = previousOverscroll;
       window.removeEventListener("keydown", handleKeyDown);
+
+      if (isBrowserFullscreenActive()) {
+        void exitBrowserFullscreen();
+      }
     };
   }, [completionAlertOpen, dashboardHref, router]);
 

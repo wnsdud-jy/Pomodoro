@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, BellRing, Expand, Pause, Play, RotateCcw, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { CompletionAlertModal } from "@/app/pomodoro/dashboard/_components/completion-alert-modal";
 import { useDashboardTimer } from "@/app/pomodoro/dashboard/_components/dashboard-timer-provider";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatSeconds } from "@/lib/format";
+import { requestBrowserFullscreen } from "@/lib/browser/fullscreen";
 import { MODE_ORDER } from "@/lib/pomodoro";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +55,7 @@ function FlowStat({
 }
 
 export function PomodoroTimer() {
+  const router = useRouter();
   const {
     completionDetail,
     completionAlertOpen,
@@ -96,6 +98,11 @@ export function PomodoroTimer() {
     tag,
   } = useDashboardTimer();
 
+  const handleOpenFullView = async () => {
+    await requestBrowserFullscreen(document.documentElement);
+    router.push(focusHref);
+  };
+
   return (
     <Card
       className={cn(
@@ -127,15 +134,9 @@ export function PomodoroTimer() {
                 {copy.completionBadge}
               </div>
             ) : null}
-            <Button
-              asChild
-              size="sm"
-              variant="secondary"
-            >
-              <Link aria-label={copy.fullViewAria} href={focusHref}>
+            <Button aria-label={copy.fullViewAria} onClick={() => void handleOpenFullView()} size="sm" type="button" variant="secondary">
                 <Expand aria-hidden="true" className="size-4" />
                 {copy.fullView}
-              </Link>
             </Button>
           </div>
         </div>

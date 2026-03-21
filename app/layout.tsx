@@ -13,6 +13,8 @@ import {
 import { getRequestPreferences } from "@/lib/preferences/server";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-jakarta",

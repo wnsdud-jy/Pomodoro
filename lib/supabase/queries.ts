@@ -1,10 +1,11 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { formatDateKey, getTodayDateKey } from "@/lib/format";
 import { serverEnv } from "@/lib/env";
 import {
   DEFAULT_POMODORO_SETTINGS_VALUES,
-  POMODORO_SETTINGS_ID,
   mergePomodoroSettings,
 } from "@/lib/pomodoro-settings";
 import type { PomodoroMode } from "@/lib/pomodoro";
@@ -14,12 +15,11 @@ import {
   type AppLocale,
   type AppTheme,
 } from "@/lib/preferences";
-import { getSupabaseAdminClient } from "@/lib/supabase/server";
 import type { PomodoroSettings, PomodoroSettingsValues } from "@/types/settings";
 import type { CreateSessionPayload, SessionRow } from "@/types/session";
 
 export type PersistedPreferences = {
-  id: "singleton";
+  user_id: string;
   locale: AppLocale;
   theme: AppTheme;
   created_at: string;
@@ -33,12 +33,14 @@ type GetCompletedSessionsOptions = {
 };
 
 export async function getCompletedSessions(
+  supabase: SupabaseClient,
+  userId: string,
   options: GetCompletedSessionsOptions = {},
 ) {
-  const supabase = getSupabaseAdminClient();
   let query = supabase
     .from("sessions")
     .select("*")
+    .eq("user_id", userId)
     .eq("completed", true)
     .order("ended_at", { ascending: false });
 
@@ -63,17 +65,24 @@ export async function getCompletedSessions(
   return (data ?? []) as SessionRow[];
 }
 
-export async function getRecentSessions(limit = 10) {
-  return getCompletedSessions({ limit });
+export async function getRecentSessions(
+  supabase: SupabaseClient,
+  userId: string,
+  limit = 10,
+) {
+  return getCompletedSessions(supabase, userId, { limit });
 }
 
-export async function getTodayFocusSeconds() {
-  const supabase = getSupabaseAdminClient();
+export async function getTodayFocusSeconds(
+  supabase: SupabaseClient,
+  userId: string,
+) {
   const lookbackStart = new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString();
 
   const { data, error } = await supabase
     .from("sessions")
     .select("duration_seconds, ended_at")
+    .eq("user_id", userId)
     .eq("completed", true)
     .eq("mode", "focus")
     .gte("ended_at", lookbackStart);
@@ -93,13 +102,17 @@ export async function getTodayFocusSeconds() {
   }, 0);
 }
 
-export async function createCompletedSession(payload: CreateSessionPayload) {
-  const supabase = getSupabaseAdminClient();
+export async function createCompletedSession(
+  supabase: SupabaseClient,
+  userId: string,
+  payload: CreateSessionPayload,
+) {
   const normalizedTag = payload.tag.trim();
 
   const { data, error } = await supabase
     .from("sessions")
     .insert({
+      user_id: userId,
       mode: payload.mode,
       tag: normalizedTag.length > 0 ? normalizedTag : null,
       duration_seconds: payload.durationSeconds,
@@ -117,11 +130,15 @@ export async function createCompletedSession(payload: CreateSessionPayload) {
   return data as SessionRow;
 }
 
-export async function deleteSessionById(id: string) {
-  const supabase = getSupabaseAdminClient();
+export async function deleteSessionById(
+  supabase: SupabaseClient,
+  userId: string,
+  id: string,
+) {
   const { data, error } = await supabase
     .from("sessions")
     .delete()
+    .eq("user_id", userId)
     .eq("id", id)
     .eq("completed", true)
     .select("id")
@@ -138,14 +155,19 @@ export async function deleteSessionById(id: string) {
   return data.id as string;
 }
 
-export async function updateSessionTagById(id: string, tag: string) {
-  const supabase = getSupabaseAdminClient();
+export async function updateSessionTagById(
+  supabase: SupabaseClient,
+  userId: string,
+  id: string,
+  tag: string,
+) {
   const normalizedTag = tag.trim();
   const { data, error } = await supabase
     .from("sessions")
     .update({
       tag: normalizedTag.length > 0 ? normalizedTag : null,
     })
+    .eq("user_id", userId)
     .eq("id", id)
     .eq("completed", true)
     .select("*")
@@ -162,12 +184,14 @@ export async function updateSessionTagById(id: string, tag: string) {
   return data as SessionRow;
 }
 
-export async function getPersistedPreferences() {
-  const supabase = getSupabaseAdminClient();
+export async function getPersistedPreferences(
+  supabase: SupabaseClient,
+  userId: string,
+) {
   const { data, error } = await supabase
     .from("app_preferences")
     .select("*")
-    .eq("id", "singleton")
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
@@ -178,12 +202,13 @@ export async function getPersistedPreferences() {
 }
 
 export async function upsertPersistedPreferences(
+  supabase: SupabaseClient,
+  userId: string,
   payload: Partial<Pick<PersistedPreferences, "locale" | "theme">>,
 ) {
-  const supabase = getSupabaseAdminClient();
-  const currentPreferences = await getPersistedPreferences();
+  const currentPreferences = await getPersistedPreferences(supabase, userId);
   const updatePayload = {
-    id: "singleton" as const,
+    user_id: userId,
     locale: payload.locale ?? currentPreferences?.locale ?? DEFAULT_APP_LOCALE,
     theme: payload.theme ?? currentPreferences?.theme ?? DEFAULT_APP_THEME,
     updated_at: new Date().toISOString(),
@@ -192,7 +217,7 @@ export async function upsertPersistedPreferences(
   const { data, error } = await supabase
     .from("app_preferences")
     .upsert(updatePayload, {
-      onConflict: "id",
+      onConflict: "user_id",
     })
     .select("*")
     .single();
@@ -204,12 +229,14 @@ export async function upsertPersistedPreferences(
   return data as PersistedPreferences;
 }
 
-export async function getPomodoroSettings() {
-  const supabase = getSupabaseAdminClient();
+export async function getPomodoroSettings(
+  supabase: SupabaseClient,
+  userId: string,
+) {
   const { data, error } = await supabase
     .from("settings")
     .select("*")
-    .eq("id", POMODORO_SETTINGS_ID)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
@@ -220,15 +247,17 @@ export async function getPomodoroSettings() {
     return mergePomodoroSettings(data as PomodoroSettings);
   }
 
-  return ensurePomodoroSettings();
+  return ensurePomodoroSettings(supabase, userId);
 }
 
-export async function ensurePomodoroSettings() {
-  const supabase = getSupabaseAdminClient();
+export async function ensurePomodoroSettings(
+  supabase: SupabaseClient,
+  userId: string,
+) {
   const { data, error } = await supabase
     .from("settings")
     .insert({
-      id: POMODORO_SETTINGS_ID,
+      user_id: userId,
       ...DEFAULT_POMODORO_SETTINGS_VALUES,
     })
     .select("*")
@@ -241,12 +270,12 @@ export async function ensurePomodoroSettings() {
   const { data: existingSettings, error: existingSettingsError } = await supabase
     .from("settings")
     .select("*")
-    .eq("id", POMODORO_SETTINGS_ID)
-    .single();
+    .eq("user_id", userId)
+    .maybeSingle();
 
-  if (existingSettingsError) {
+  if (existingSettingsError || !existingSettings) {
     throw new Error(
-      `Failed to initialize pomodoro settings: ${existingSettingsError.message}`,
+      `Failed to initialize pomodoro settings: ${existingSettingsError?.message ?? "Settings not found"}`,
     );
   }
 
@@ -254,14 +283,14 @@ export async function ensurePomodoroSettings() {
 }
 
 export async function upsertPomodoroSettings(
+  supabase: SupabaseClient,
+  userId: string,
   payload: Partial<PomodoroSettingsValues>,
 ) {
-  const supabase = getSupabaseAdminClient();
-  const currentSettings = await getPomodoroSettings();
+  const currentSettings = await getPomodoroSettings(supabase, userId);
   const updatePayload = {
-    id: POMODORO_SETTINGS_ID,
-    focus_minutes:
-      payload.focus_minutes ?? currentSettings.focus_minutes,
+    user_id: userId,
+    focus_minutes: payload.focus_minutes ?? currentSettings.focus_minutes,
     short_break_minutes:
       payload.short_break_minutes ?? currentSettings.short_break_minutes,
     long_break_minutes:
@@ -279,7 +308,7 @@ export async function upsertPomodoroSettings(
   const { data, error } = await supabase
     .from("settings")
     .upsert(updatePayload, {
-      onConflict: "id",
+      onConflict: "user_id",
     })
     .select("*")
     .single();

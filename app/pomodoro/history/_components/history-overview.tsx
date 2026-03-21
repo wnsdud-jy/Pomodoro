@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatDurationLabel } from "@/lib/format";
 import type { AppDictionary } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/preferences";
-import type { HistorySummaryStats } from "@/types/session";
+import type { FocusStreakSummary, HistorySummaryStats } from "@/types/session";
 
 function SummaryCard({
   icon,
@@ -45,10 +45,12 @@ function SummaryCard({
 
 export function HistoryOverview({
   stats,
+  streak,
   locale,
   copy,
 }: {
   stats: HistorySummaryStats;
+  streak: FocusStreakSummary;
   locale: AppLocale;
   copy: AppDictionary["history"]["overview"];
 }) {
@@ -63,7 +65,7 @@ export function HistoryOverview({
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
         <SummaryCard
           caption={copy.focusCountTemplate.replace(
             "{count}",
@@ -106,6 +108,14 @@ export function HistoryOverview({
           icon={<Tags aria-hidden="true" className="size-5" />}
           label={copy.topTagLabel}
           value={stats.topTag?.tag ?? copy.topTagEmpty}
+        />
+        <SummaryCard
+          caption={
+            streak.todayCompleted ? copy.streakTodayDone : copy.streakTodayPending
+          }
+          icon={<Sparkles aria-hidden="true" className="size-5" />}
+          label={copy.streakLabel}
+          value={String(streak.currentStreak)}
         />
       </div>
     </section>

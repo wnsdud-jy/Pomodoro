@@ -5,6 +5,7 @@ import { ArrowLeft, Pause, Play, RotateCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { CompletionAlertModal } from "@/app/pomodoro/dashboard/_components/completion-alert-modal";
 import { useDashboardTimer } from "@/app/pomodoro/dashboard/_components/dashboard-timer-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,8 +20,16 @@ export function FocusTimerScreen() {
   const router = useRouter();
   const {
     completionDetail,
+    completionAlertOpen,
+    completionAlertDetail,
+    completionAlertTone,
+    completionNextMessage,
+    completionPrimaryActionLabel,
+    completionSecondaryActionLabel,
     completionState,
+    completionStreakMessage,
     completionSummaryMessage,
+    completionTitle,
     copy,
     dashboardHref,
     focusCycleText,
@@ -32,10 +41,15 @@ export function FocusTimerScreen() {
     modeConfig,
     modeCopy,
     nextMode,
+    pendingRecovery,
     remainingSeconds,
     resetTimer,
+    dismissPendingRecovery,
+    dismissCompletionAlert,
+    resumePendingRecovery,
     saveStatusMessage,
     selectedMode,
+    startNextSessionFromAlert,
     setTagValue,
     settings,
     status,
@@ -55,6 +69,10 @@ export function FocusTimerScreen() {
         return;
       }
 
+      if (completionAlertOpen) {
+        return;
+      }
+
       event.preventDefault();
       router.push(dashboardHref);
     };
@@ -66,7 +84,7 @@ export function FocusTimerScreen() {
       document.body.style.overscrollBehavior = previousOverscroll;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [dashboardHref, router]);
+  }, [completionAlertOpen, dashboardHref, router]);
 
   return (
     <section
@@ -74,6 +92,19 @@ export function FocusTimerScreen() {
       className="fixed inset-0 z-[80] overflow-hidden px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:px-6"
     >
       <div className="absolute inset-0 bg-[rgba(3,8,21,0.94)]" />
+      <CompletionAlertModal
+        detail={completionNextMessage ?? completionAlertDetail}
+        onPrimaryAction={startNextSessionFromAlert}
+        onSecondaryAction={dismissCompletionAlert}
+        open={completionAlertOpen && Boolean(completionState && completionSummaryMessage)}
+        primaryLabel={completionPrimaryActionLabel}
+        saveStatusMessage={null}
+        summary={completionSummaryMessage ?? ""}
+        secondaryLabel={completionSecondaryActionLabel}
+        streakMessage={completionStreakMessage}
+        title={completionTitle}
+        tone={completionAlertTone}
+      />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.12),transparent_34%),radial-gradient(circle_at_bottom,rgba(45,212,191,0.12),transparent_38%)]" />
       <div
         className={cn(
@@ -128,6 +159,26 @@ export function FocusTimerScreen() {
           <p className="max-w-3xl text-balance text-lg leading-7 text-slate-300 md:text-xl">
             {modeCopy[selectedMode].description}
           </p>
+
+          {pendingRecovery ? (
+            <div className="max-w-2xl rounded-[24px] border border-amber-300/25 bg-amber-400/10 px-4 py-4 text-left text-sm leading-6 text-amber-50">
+              <p className="font-semibold">{copy.recoveryTitle}</p>
+              <p className="mt-1">
+                {copy.recoveryDescriptionTemplate
+                  .replace("{mode}", modeCopy[pendingRecovery.mode].label)
+                  .replace("{status}", copy.status[pendingRecovery.status])
+                  .replace("{remaining}", formatSeconds(pendingRecovery.remainingSeconds))}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button onClick={resumePendingRecovery} size="sm" type="button">
+                  {copy.recoveryResume}
+                </Button>
+                <Button onClick={dismissPendingRecovery} size="sm" type="button" variant="secondary">
+                  {copy.recoveryDismiss}
+                </Button>
+              </div>
+            </div>
+          ) : null}
 
           <p className="font-mono text-[clamp(5rem,18vw,9rem)] font-semibold tracking-[-0.08em] text-white tabular-nums">
             {formatSeconds(remainingSeconds)}

@@ -27,6 +27,12 @@ export type TodaySessionSummary = {
   topTags: TagFocusSummaryRow[];
 };
 
+export type FocusStreakSummary = {
+  currentStreak: number;
+  longestStreak: number;
+  todayCompleted: boolean;
+};
+
 export type HistoryOverviewStats = {
   todayFocusSeconds: number;
   last7DaysFocusSeconds: number;
@@ -84,4 +90,9 @@ export type CreateSessionPayload = {
   startedAt: string;
   endedAt: string;
   completed: true;
+};
+
+export type UpdateSessionTagPayload = {
+  id: string;
+  tag: string;
 };

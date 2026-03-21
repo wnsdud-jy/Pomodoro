@@ -6,6 +6,7 @@ import {
 } from "@/lib/format";
 import type { AppLocale } from "@/lib/preferences";
 import type {
+  FocusStreakSummary,
   FocusTrendPoint,
   GroupedSessionDay,
   HistoryInsightSummary,
@@ -225,6 +226,65 @@ function buildRangeSummary(sessions: SessionRow[]) {
       0,
     ),
     focusCount: focusSessions.length,
+  };
+}
+
+export function buildFocusStreakSummary(
+  sessions: SessionRow[],
+  options: Pick<SessionStatsOptions, "nowIso" | "timeZone">,
+): FocusStreakSummary {
+  const timeZone = getTimeZone(options.timeZone);
+  const todayKey = formatDateKey(options.nowIso, timeZone);
+  const focusDayKeys = Array.from(
+    new Set(getFocusSessions(sessions).map((session) => getSessionDateKey(session, timeZone))),
+  ).sort((left, right) => left.localeCompare(right));
+
+  if (focusDayKeys.length === 0) {
+    return {
+      currentStreak: 0,
+      longestStreak: 0,
+      todayCompleted: false,
+    };
+  }
+
+  let longestStreak = 0;
+  let runningStreak = 0;
+
+  for (let index = 0; index < focusDayKeys.length; index += 1) {
+    const dateKey = focusDayKeys[index];
+    const previousKey = index > 0 ? focusDayKeys[index - 1] : null;
+
+    if (previousKey && addDaysToDateKey(previousKey, 1) === dateKey) {
+      runningStreak += 1;
+    } else {
+      runningStreak = 1;
+    }
+
+    longestStreak = Math.max(longestStreak, runningStreak);
+  }
+
+  const focusDaySet = new Set(focusDayKeys);
+  const todayCompleted = focusDaySet.has(todayKey);
+  const latestKey = focusDayKeys[focusDayKeys.length - 1];
+  const currentStreak =
+    latestKey === todayKey || latestKey === addDaysToDateKey(todayKey, -1)
+      ? (() => {
+          let streak = 0;
+          let cursor = latestKey;
+
+          while (focusDaySet.has(cursor)) {
+            streak += 1;
+            cursor = addDaysToDateKey(cursor, -1);
+          }
+
+          return streak;
+        })()
+      : 0;
+
+  return {
+    currentStreak,
+    longestStreak,
+    todayCompleted,
   };
 }
 

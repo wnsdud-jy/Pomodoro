@@ -4,11 +4,10 @@ import { z } from "zod";
 
 import { getAuthSession } from "@/lib/auth/session";
 import { DASHBOARD_PATH, HISTORY_PATH } from "@/lib/auth/constants";
-import { getModeDurationSeconds } from "@/lib/pomodoro-settings";
 import {
   createCompletedSession,
   deleteSessionById,
-  getPomodoroSettings,
+  updateSessionTagById,
 } from "@/lib/supabase/queries";
 
 export const runtime = "nodejs";
@@ -34,6 +33,11 @@ const createSessionSchema = z
 
 const deleteSessionSchema = z.object({
   id: z.string().uuid(),
+});
+
+const updateSessionTagSchema = z.object({
+  id: z.string().uuid(),
+  tag: z.string().max(40),
 });
 
 export async function POST(request: Request) {
@@ -64,16 +68,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    const settings = await getPomodoroSettings();
-    const expectedDurationSeconds = getModeDurationSeconds(parsed.data.mode, settings);
-
-    if (parsed.data.durationSeconds !== expectedDurationSeconds) {
-      return NextResponse.json(
-        { error: "Invalid duration for mode" },
-        { status: 400 },
-      );
-    }
-
     const createdSession = await createCompletedSession(parsed.data);
     revalidatePath(DASHBOARD_PATH);
     revalidatePath(HISTORY_PATH);
@@ -118,6 +112,47 @@ export async function DELETE(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to delete session";
+
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request) {
+  const session = await getAuthSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let json: unknown;
+
+  try {
+    json = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+  }
+
+  const parsed = updateSessionTagSchema.safeParse(json);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        error: "Invalid update payload",
+        details: parsed.error.flatten(),
+      },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const updatedSession = await updateSessionTagById(parsed.data.id, parsed.data.tag);
+    revalidatePath(DASHBOARD_PATH);
+    revalidatePath(HISTORY_PATH);
+
+    return NextResponse.json({ data: updatedSession }, { status: 200 });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update session tag";
 
     return NextResponse.json({ error: message }, { status: 500 });
   }

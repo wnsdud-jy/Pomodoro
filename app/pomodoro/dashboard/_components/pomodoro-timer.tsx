@@ -3,6 +3,7 @@
 import { ArrowRight, BellRing, Expand, Pause, Play, RotateCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
 
+import { CompletionAlertModal } from "@/app/pomodoro/dashboard/_components/completion-alert-modal";
 import { useDashboardTimer } from "@/app/pomodoro/dashboard/_components/dashboard-timer-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,8 +56,16 @@ function FlowStat({
 export function PomodoroTimer() {
   const {
     completionDetail,
+    completionAlertOpen,
+    completionAlertDetail,
+    completionAlertTone,
+    completionNextMessage,
+    completionPrimaryActionLabel,
+    completionSecondaryActionLabel,
     completionState,
+    completionStreakMessage,
     completionSummaryMessage,
+    completionTitle,
     copy,
     currentFocusIndex,
     focusCycleText,
@@ -69,10 +78,17 @@ export function PomodoroTimer() {
     modeConfig,
     modeCopy,
     nextMode,
+    pendingRecovery,
+    recentTags,
     remainingSeconds,
     resetTimer,
+    resumePendingRecovery,
+    dismissPendingRecovery,
+    dismissCompletionAlert,
     saveStatusMessage,
     selectedMode,
+    startNextSessionFromAlert,
+    applySuggestedTag,
     setTagValue,
     settings,
     status,
@@ -159,15 +175,36 @@ export function PomodoroTimer() {
           <Badge variant="outline">{focusCycleText}</Badge>
         </div>
 
-          <Tabs onValueChange={handleModeChange} value={selectedMode}>
-            <TabsList className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {MODE_ORDER.map((mode) => (
-              <TabsTrigger
-                className="min-h-11 focus-visible:ring-0 focus-visible:ring-offset-0"
-                key={mode}
-                value={mode}
-              >
-                {modeCopy[mode].label}
+        {pendingRecovery ? (
+          <div className="rounded-[24px] border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-900 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-100">
+            <p className="font-semibold">{copy.recoveryTitle}</p>
+            <p className="mt-1 leading-6">
+              {formatTemplate(copy.recoveryDescriptionTemplate, {
+                mode: modeCopy[pendingRecovery.mode].label,
+                status: copy.status[pendingRecovery.status],
+                remaining: formatSeconds(pendingRecovery.remainingSeconds),
+              })}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button onClick={resumePendingRecovery} size="sm" type="button">
+                {copy.recoveryResume}
+              </Button>
+              <Button onClick={dismissPendingRecovery} size="sm" type="button" variant="secondary">
+                {copy.recoveryDismiss}
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
+        <Tabs onValueChange={handleModeChange} value={selectedMode}>
+          <TabsList className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {MODE_ORDER.map((mode) => (
+               <TabsTrigger
+                 className="min-h-11 focus-visible:ring-0 focus-visible:ring-offset-0"
+                 key={mode}
+                 value={mode}
+               >
+                 {modeCopy[mode].label}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -175,6 +212,19 @@ export function PomodoroTimer() {
       </CardHeader>
 
       <CardContent className="relative space-y-6">
+        <CompletionAlertModal
+          detail={completionNextMessage ?? completionAlertDetail}
+          onPrimaryAction={startNextSessionFromAlert}
+          onSecondaryAction={dismissCompletionAlert}
+          open={completionAlertOpen && Boolean(completionState && completionSummaryMessage)}
+          primaryLabel={completionPrimaryActionLabel}
+          saveStatusMessage={null}
+          summary={completionSummaryMessage ?? ""}
+          secondaryLabel={completionSecondaryActionLabel}
+          streakMessage={completionStreakMessage}
+          title={completionTitle}
+          tone={completionAlertTone}
+        />
         <div className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-100/70 p-6 dark:border-white/10 dark:bg-slate-950/55">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -220,9 +270,6 @@ export function PomodoroTimer() {
               {copy.reset}
             </Button>
           </div>
-          <p className="mt-4 text-center text-sm leading-6 text-slate-500 dark:text-slate-400">
-            {copy.fullViewHint}
-          </p>
         </div>
 
         <div className="space-y-3 rounded-[28px] border border-slate-200/80 bg-slate-50/80 p-5 dark:border-transparent dark:bg-slate-950/45">
@@ -238,6 +285,23 @@ export function PomodoroTimer() {
             placeholder={copy.tagPlaceholder}
             value={tag}
           />
+          {recentTags.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {recentTags.map((recentTag) => (
+                <Button
+                  className="h-8 rounded-full px-3"
+                  disabled={isTagLocked}
+                  key={recentTag}
+                  onClick={() => applySuggestedTag(recentTag)}
+                  size="sm"
+                  type="button"
+                  variant={tag === recentTag ? "default" : "secondary"}
+                >
+                  {recentTag}
+                </Button>
+              ))}
+            </div>
+          ) : null}
           <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
             {copy.tagHelp}
           </p>

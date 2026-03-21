@@ -3,6 +3,7 @@ import { Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { formatDateTime, formatDurationLabel } from "@/lib/format";
 import type { AppDictionary } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/preferences";
@@ -43,7 +44,14 @@ export function HistorySessionList({
   unlabeledTag,
   pendingDeleteId,
   deleteError,
+  editingId,
+  editingTagValue,
   onRequestDelete,
+  onEditTagCancel,
+  onEditTagChange,
+  onEditTagSave,
+  onEditTagStart,
+  pendingTagUpdateId,
 }: {
   days: GroupedSessionDay[];
   locale: AppLocale;
@@ -53,7 +61,14 @@ export function HistorySessionList({
   unlabeledTag: string;
   pendingDeleteId: string | null;
   deleteError: string | null;
+  editingId: string | null;
+  editingTagValue: string;
   onRequestDelete: (sessionId: string) => void;
+  onEditTagCancel: () => void;
+  onEditTagChange: (value: string) => void;
+  onEditTagSave: (sessionId: string) => void;
+  onEditTagStart: (sessionId: string, currentTag: string | null) => void;
+  pendingTagUpdateId: string | null;
 }) {
   return (
     <Card>
@@ -96,6 +111,8 @@ export function HistorySessionList({
               <div className="space-y-3">
                 {day.sessions.map((session) => {
                   const isDeleting = pendingDeleteId === session.id;
+                  const isEditing = editingId === session.id;
+                  const isSavingTag = pendingTagUpdateId === session.id;
 
                   return (
                     <div
@@ -114,9 +131,56 @@ export function HistorySessionList({
                         <SessionField
                           label={copy.tagLabel}
                           value={
-                            <p className="break-words text-sm font-medium text-slate-900 dark:text-slate-100">
-                              {session.tag || unlabeledTag}
-                            </p>
+                            isEditing ? (
+                              <div className="space-y-2">
+                                <Input
+                                  autoComplete="off"
+                                  className="bg-white/85 dark:bg-slate-950/80"
+                                  maxLength={40}
+                                  onChange={(event) => onEditTagChange(event.target.value)}
+                                  onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                      event.preventDefault();
+                                      onEditTagSave(session.id);
+                                    }
+
+                                    if (event.key === "Escape") {
+                                      event.preventDefault();
+                                      onEditTagCancel();
+                                    }
+                                  }}
+                                  value={editingTagValue}
+                                />
+                                <div className="flex flex-wrap gap-2">
+                                  <Button
+                                    disabled={isSavingTag}
+                                    onClick={() => onEditTagSave(session.id)}
+                                    size="sm"
+                                    type="button"
+                                  >
+                                    {isSavingTag ? copy.savingTag : copy.saveTag}
+                                  </Button>
+                                  <Button onClick={onEditTagCancel} size="sm" type="button" variant="ghost">
+                                    {copy.cancelTagEdit}
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <p className="break-words text-sm font-medium text-slate-900 dark:text-slate-100">
+                                  {session.tag || unlabeledTag}
+                                </p>
+                                <Button
+                                  className="h-auto px-0 text-sm"
+                                  onClick={() => onEditTagStart(session.id, session.tag)}
+                                  size="sm"
+                                  type="button"
+                                  variant="ghost"
+                                >
+                                  {copy.editTag}
+                                </Button>
+                              </div>
+                            )
                           }
                         />
                         <SessionField

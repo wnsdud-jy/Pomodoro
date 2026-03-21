@@ -8,7 +8,7 @@ import { HISTORY_PATH } from "@/lib/auth/constants";
 import { serverEnv } from "@/lib/env";
 import { getDictionary } from "@/lib/i18n/messages";
 import { getRequestPreferences } from "@/lib/preferences/server";
-import { buildTodaySessionSummary } from "@/lib/session-stats";
+import { buildFocusStreakSummary, buildTodaySessionSummary } from "@/lib/session-stats";
 import { getCompletedSessions, getRecentSessions } from "@/lib/supabase/queries";
 
 export const metadata: Metadata = {
@@ -19,13 +19,9 @@ export default async function DashboardPage() {
   const { locale } = await getRequestPreferences();
   const dictionary = getDictionary(locale);
   const nowIso = new Date().toISOString();
-  const summaryLookbackStart = new Date(
-    new Date(nowIso).getTime() - 1000 * 60 * 60 * 48,
-  ).toISOString();
-
   const [recentSessionsResult, todaySummarySourceResult] = await Promise.allSettled([
     getRecentSessions(24),
-    getCompletedSessions({ endedAfter: summaryLookbackStart }),
+    getCompletedSessions(),
   ]);
   const dashboardWarnings: string[] = [];
 
@@ -48,12 +44,23 @@ export default async function DashboardPage() {
           timeZone: serverEnv.APP_TIMEZONE,
           unlabeledTag: dictionary.common.unlabeledTag,
         })
+        : {
+            focusSeconds: 0,
+            focusCount: 0,
+            shortBreakCount: 0,
+            longBreakCount: 0,
+            topTags: [],
+          };
+  const streakSummary =
+    todaySummarySourceResult.status === "fulfilled"
+      ? buildFocusStreakSummary(todaySummarySourceResult.value, {
+          nowIso,
+          timeZone: serverEnv.APP_TIMEZONE,
+        })
       : {
-          focusSeconds: 0,
-          focusCount: 0,
-          shortBreakCount: 0,
-          longBreakCount: 0,
-          topTags: [],
+          currentStreak: 0,
+          longestStreak: 0,
+          todayCompleted: false,
         };
 
   return (
@@ -75,6 +82,7 @@ export default async function DashboardPage() {
             copy={dictionary.dashboard.todaySummary}
             locale={locale}
             summary={todaySummary}
+            streak={streakSummary}
           />
           <RecentSessions
             copy={dictionary.dashboard.recentSessions}

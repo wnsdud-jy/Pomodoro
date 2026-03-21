@@ -1,8 +1,6 @@
 import type { PomodoroMode } from "@/lib/pomodoro";
 import type { PomodoroSettings, PomodoroSettingsValues } from "@/types/settings";
 
-export const POMODORO_SETTINGS_ID = "singleton";
-
 export const POMODORO_SETTINGS_LIMITS = {
   focus_minutes: { min: 1, max: 180 },
   short_break_minutes: { min: 1, max: 60 },
@@ -25,7 +23,6 @@ export function createDefaultPomodoroSettings(
   nowIso = new Date().toISOString(),
 ): PomodoroSettings {
   return {
-    id: POMODORO_SETTINGS_ID,
     ...DEFAULT_POMODORO_SETTINGS_VALUES,
     created_at: nowIso,
     updated_at: nowIso,
@@ -44,7 +41,6 @@ export function mergePomodoroSettings(
   return {
     ...defaults,
     ...settings,
-    id: POMODORO_SETTINGS_ID,
     created_at: settings.created_at ?? defaults.created_at,
     updated_at: settings.updated_at ?? defaults.updated_at,
   };

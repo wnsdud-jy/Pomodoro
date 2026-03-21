@@ -3,12 +3,12 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { signInWithPassword } from "@/lib/auth/session";
 import { getDictionary } from "@/lib/i18n/messages";
 import { getRequestPreferences } from "@/lib/preferences/server";
-import { issueSessionCookie, validateAppCredentials } from "@/lib/auth/session";
 
 const loginSchema = z.object({
-  loginId: z.string().trim().min(1),
+  email: z.string().trim().email(),
   password: z.string().min(1),
 });
 
@@ -23,7 +23,7 @@ export async function loginAction(
   const { locale } = await getRequestPreferences();
   const dictionary = getDictionary(locale);
   const parsed = loginSchema.safeParse({
-    loginId: formData.get("loginId"),
+    email: formData.get("email"),
     password: formData.get("password"),
   });
 
@@ -33,17 +33,13 @@ export async function loginAction(
     };
   }
 
-  const isValid = validateAppCredentials(
-    parsed.data.loginId,
-    parsed.data.password,
-  );
-
-  if (!isValid) {
+  try {
+    await signInWithPassword(parsed.data.email, parsed.data.password);
+  } catch {
     return {
       error: dictionary.auth.invalidCredentials,
     };
   }
 
-  await issueSessionCookie();
   redirect("/pomodoro/dashboard");
 }

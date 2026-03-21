@@ -1,6 +1,28 @@
 "use client";
 
 let audioContext: AudioContext | null = null;
+let activeOscillator: OscillatorNode | null = null;
+let activeGain: GainNode | null = null;
+
+function stopActiveNodes() {
+  try {
+    activeOscillator?.stop();
+  } catch {
+  }
+
+  try {
+    activeOscillator?.disconnect();
+    activeGain?.disconnect();
+  } catch {
+  }
+
+  activeOscillator = null;
+  activeGain = null;
+}
+
+export function stopCompletionSound() {
+  stopActiveNodes();
+}
 
 export async function playCompletionSound(enabled: boolean) {
   if (!enabled || typeof window === "undefined") {
@@ -27,6 +49,10 @@ export async function playCompletionSound(enabled: boolean) {
   const oscillator = audioContext.createOscillator();
   const gain = audioContext.createGain();
 
+  stopActiveNodes();
+  activeOscillator = oscillator;
+  activeGain = gain;
+
   oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
   oscillator.frequency.exponentialRampToValueAtTime(660, audioContext.currentTime + 0.18);
@@ -37,6 +63,12 @@ export async function playCompletionSound(enabled: boolean) {
 
   oscillator.connect(gain);
   gain.connect(audioContext.destination);
+
+  oscillator.onended = () => {
+    if (activeOscillator === oscillator) {
+      stopActiveNodes();
+    }
+  };
 
   oscillator.start(audioContext.currentTime);
   oscillator.stop(audioContext.currentTime + 0.26);

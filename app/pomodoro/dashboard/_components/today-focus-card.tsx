@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatDurationLabel } from "@/lib/format";
 import type { AppDictionary } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/preferences";
-import type { TodaySessionSummary } from "@/types/session";
+import type { FocusStreakSummary, TodaySessionSummary } from "@/types/session";
 
 function MetricTile({
   label,
@@ -28,10 +28,12 @@ function MetricTile({
 
 export function TodayFocusCard({
   summary,
+  streak,
   locale,
   copy,
 }: {
   summary: TodaySessionSummary;
+  streak: FocusStreakSummary;
   locale: AppLocale;
   copy: AppDictionary["dashboard"]["todaySummary"];
 }) {
@@ -60,6 +62,12 @@ export function TodayFocusCard({
           <MetricTile
             label={copy.longBreakCountLabel}
             value={String(summary.longBreakCount)}
+          />
+          <MetricTile label={copy.currentStreakLabel} value={String(streak.currentStreak)} />
+          <MetricTile label={copy.bestStreakLabel} value={String(streak.longestStreak)} />
+          <MetricTile
+            label={copy.todayGoalLabel}
+            value={streak.todayCompleted ? copy.todayGoalDone : copy.todayGoalPending}
           />
         </div>
 

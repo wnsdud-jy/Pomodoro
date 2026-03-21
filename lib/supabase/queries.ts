@@ -138,6 +138,30 @@ export async function deleteSessionById(id: string) {
   return data.id as string;
 }
 
+export async function updateSessionTagById(id: string, tag: string) {
+  const supabase = getSupabaseAdminClient();
+  const normalizedTag = tag.trim();
+  const { data, error } = await supabase
+    .from("sessions")
+    .update({
+      tag: normalizedTag.length > 0 ? normalizedTag : null,
+    })
+    .eq("id", id)
+    .eq("completed", true)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to update session tag: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error("Session not found");
+  }
+
+  return data as SessionRow;
+}
+
 export async function getPersistedPreferences() {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase

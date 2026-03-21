@@ -27,6 +27,7 @@ import { HISTORY_PATH } from "@/lib/auth/constants";
 import type { AppDictionary } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/preferences";
 import {
+  buildFocusStreakSummary,
   buildFocusTrendPoints,
   buildHistoryInsightSummary,
   buildHistorySummaryStats,
@@ -81,7 +82,10 @@ export function HistoryView({
   const [selectedDate, setSelectedDate] = useState(initialSelectedDate ?? "");
   const [tagQuery, setTagQuery] = useState(initialTagQuery);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTagValue, setEditingTagValue] = useState("");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingTagUpdateId, setPendingTagUpdateId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const deferredTagQuery = useDeferredValue(tagQuery);
   const hasHydratedFromUrlRef = useRef(false);
@@ -165,6 +169,10 @@ export function HistoryView({
     timeZone,
     unlabeledTag,
     locale,
+  });
+  const streakSummary = buildFocusStreakSummary(sessions, {
+    nowIso,
+    timeZone,
   });
   const recent7Days = buildFocusTrendPoints(sessions, {
     days: 7,
@@ -289,6 +297,57 @@ export function HistoryView({
     }
   }
 
+  async function handleTagUpdate(sessionId: string) {
+    const nextTag = editingTagValue.trim();
+    const previousSession = sessions.find((session) => session.id === sessionId);
+
+    if (!previousSession) {
+      return;
+    }
+
+    const previousTag = previousSession.tag;
+    setPendingTagUpdateId(sessionId);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch("/pomodoro/api/sessions", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: sessionId,
+          tag: nextTag,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update session tag");
+      }
+
+      setSessions((currentSessions) =>
+        currentSessions.map((session) =>
+          session.id === sessionId
+            ? { ...session, tag: nextTag.length > 0 ? nextTag : null }
+            : session,
+        ),
+      );
+      setEditingId(null);
+      setEditingTagValue("");
+      toast({
+        title: copy.list.updateTagSuccessTitle,
+        description: copy.list.updateTagSuccessDescription,
+        variant: "success",
+      });
+    } catch {
+      setEditingId(sessionId);
+      setEditingTagValue(previousTag ?? "");
+      setDeleteError(copy.list.updateTagError);
+    } finally {
+      setPendingTagUpdateId(null);
+    }
+  }
+
   function resetFilters() {
     setModeFilter("all");
     setPeriodFilter("all");
@@ -298,7 +357,12 @@ export function HistoryView({
 
   return (
     <div className="space-y-6">
-      <HistoryOverview copy={copy.overview} locale={locale} stats={summaryStats} />
+      <HistoryOverview
+        copy={copy.overview}
+        locale={locale}
+        stats={summaryStats}
+        streak={streakSummary}
+      />
 
       <HistoryAnalytics
         copy={copy.analytics}
@@ -427,13 +491,27 @@ export function HistoryView({
         copy={copy.list}
         days={groupedSessions}
         deleteError={deleteError}
+        editingId={editingId}
+        editingTagValue={editingTagValue}
         locale={locale}
         modeCopy={modeCopy}
+        onEditTagCancel={() => {
+          setEditingId(null);
+          setEditingTagValue("");
+        }}
+        onEditTagChange={setEditingTagValue}
+        onEditTagSave={(sessionId) => void handleTagUpdate(sessionId)}
+        onEditTagStart={(sessionId, currentTag) => {
+          setDeleteError(null);
+          setEditingId(sessionId);
+          setEditingTagValue(currentTag ?? "");
+        }}
         onRequestDelete={(sessionId) => {
           setDeleteError(null);
           setConfirmingId(sessionId);
         }}
         pendingDeleteId={pendingDeleteId}
+        pendingTagUpdateId={pendingTagUpdateId}
         timeZone={timeZone}
         unlabeledTag={unlabeledTag}
       />

@@ -30,7 +30,7 @@ import { formatDateTime, formatDurationLabel } from "@/lib/format";
 import { MODE_ORDER } from "@/lib/pomodoro";
 import { getDictionary } from "@/lib/i18n/messages";
 import { getRequestPreferences } from "@/lib/preferences/server";
-import type { SessionRow, TodaySessionSummary } from "@/types/session";
+import type { FocusStreakSummary, SessionRow, TodaySessionSummary } from "@/types/session";
 
 export const metadata: Metadata = {
   title: "Demo",
@@ -58,6 +58,12 @@ const DEMO_SUMMARY: TodaySessionSummary = {
       sessionCount: 1,
     },
   ],
+};
+
+const DEMO_STREAK: FocusStreakSummary = {
+  currentStreak: 4,
+  longestStreak: 9,
+  todayCompleted: true,
 };
 
 const DEMO_SESSIONS: SessionRow[] = [
@@ -441,6 +447,7 @@ export default async function DemoPage() {
                   copy={dictionary.dashboard.todaySummary}
                   locale={locale}
                   summary={DEMO_SUMMARY}
+                  streak={DEMO_STREAK}
                 />
                 <DemoRecentSessions locale={locale} />
               </div>

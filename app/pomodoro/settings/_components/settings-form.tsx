@@ -129,6 +129,13 @@ export function SettingsForm({
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [permission, setPermission] = useState<BrowserNotificationPermission>("unsupported");
   const [values, setValues] = useState<FormValues>(buildFormValues(initialValues));
+  const [savedValues, setSavedValues] = useState<FormValues>(buildFormValues(initialValues));
+
+  useEffect(() => {
+    const nextValues = buildFormValues(initialValues);
+    setValues(nextValues);
+    setSavedValues(nextValues);
+  }, [initialValues]);
 
   useEffect(() => {
     setPermission(getBrowserNotificationPermission());
@@ -171,6 +178,10 @@ export function SettingsForm({
           : copy.summaryAlertsOff,
     }),
     [copy, initialValues],
+  );
+  const isDirty = useMemo(
+    () => JSON.stringify(parsePayload(values)) !== JSON.stringify(parsePayload(savedValues)),
+    [savedValues, values],
   );
 
   function parsePayload(currentValues: FormValues) {
@@ -260,6 +271,7 @@ export function SettingsForm({
         description: copy.saveSuccessDescription,
         variant: "success",
       });
+      setSavedValues(values);
 
       startTransition(() => {
         router.refresh();
@@ -299,7 +311,7 @@ export function SettingsForm({
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit} ref={formRef}>
+    <form className="space-y-6 pb-28" onSubmit={handleSubmit} ref={formRef}>
       <Card>
         <CardHeader className="space-y-3">
           <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-700 dark:bg-cyan-400/15 dark:text-cyan-300">
@@ -505,16 +517,26 @@ export function SettingsForm({
         </CardContent>
       </Card>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <div className="flex justify-end">
         <Button onClick={handleRestoreDefaults} type="button" variant="ghost">
           <RotateCcw aria-hidden="true" className="size-4" />
           {copy.restoreDefaults}
         </Button>
-        <Button disabled={pending} size="lg" type="submit">
-          <Save aria-hidden="true" className="size-4" />
-          {pending ? copy.saving : copy.save}
-        </Button>
       </div>
+
+      {isDirty ? (
+        <div className="pointer-events-none fixed bottom-4 right-4 z-40 sm:bottom-6 sm:right-6">
+          <Button
+            className="pointer-events-auto h-12 rounded-full px-5 shadow-[0_16px_40px_-18px_rgba(15,23,42,0.45)]"
+            disabled={pending}
+            size="lg"
+            type="submit"
+          >
+            <Save aria-hidden="true" className="size-4" />
+            {pending ? copy.saving : copy.save}
+          </Button>
+        </div>
+      ) : null}
 
       <div aria-live="polite" className="sr-only">
         {pending ? copy.saving : ""}

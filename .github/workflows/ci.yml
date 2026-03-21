@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      APP_LOGIN_ID: admin
+      APP_LOGIN_PASSWORD: change-me-please
+      SESSION_SECRET: replace-with-a-long-random-string-at-least-32-characters
+      SUPABASE_URL: https://your-project-ref.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: your-supabase-service-role-key
+      APP_TIMEZONE: Asia/Seoul
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run production build
+        run: npm run build

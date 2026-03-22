@@ -17,6 +17,7 @@ import { DASHBOARD_FOCUS_PATH, DASHBOARD_PATH } from "@/lib/auth/constants";
 import { playCompletionSound, stopCompletionSound } from "@/lib/browser/audio";
 import { sendBrowserNotification } from "@/lib/browser/notifications";
 import { buildTimerDocumentTitle, restoreDocumentTitle } from "@/lib/browser/title";
+import { formatDurationLabel } from "@/lib/format";
 import type { AppDictionary } from "@/lib/i18n/messages";
 import {
   getCurrentFocusIndex,
@@ -25,6 +26,7 @@ import {
 } from "@/lib/pomodoro-flow";
 import { getModeDurationSeconds } from "@/lib/pomodoro-settings";
 import { getModeConfig, MODE_ORDER, type PomodoroMode } from "@/lib/pomodoro";
+import type { AppLocale } from "@/lib/preferences";
 import type { PomodoroSettings } from "@/types/settings";
 import type { CreateSessionPayload } from "@/types/session";
 
@@ -129,15 +131,6 @@ function buildModeHref(pathname: string, mode: PomodoroMode) {
   return `${pathname}?mode=${mode}`;
 }
 
-function getDurationMinutesLabel(
-  template: string,
-  durationSeconds: number,
-) {
-  return formatTemplate(template, {
-    minutes: Math.max(1, Math.round(durationSeconds / 60)),
-  });
-}
-
 function getCompletionAlertTone(mode: PomodoroMode): CompletionAlertTone {
   return mode === "focus" ? "focus" : "break";
 }
@@ -149,6 +142,7 @@ export function DashboardTimerProvider({
   initialDailyFocusStreak,
   initialFocusStreak,
   initialTodayFocusCount,
+  locale,
   modeCopy,
   recentTags,
   settings,
@@ -159,6 +153,7 @@ export function DashboardTimerProvider({
   initialDailyFocusStreak: number;
   initialFocusStreak: number;
   initialTodayFocusCount: number;
+  locale: AppLocale;
   modeCopy: AppDictionary["modes"];
   recentTags: string[];
   settings: PomodoroSettings;
@@ -827,15 +822,9 @@ export function DashboardTimerProvider({
       : completionState?.behavior === "auto_advance"
         ? copy.autoAdvanceAlertDetail
         : copy.manualAlertDetail;
-  const completionDurationLabel = getDurationMinutesLabel(
-    copy.durationMinutesTemplate,
-    plannedDurationSeconds,
-  );
+  const completionDurationLabel = formatDurationLabel(plannedDurationSeconds, locale);
   const completionNextDurationLabel = completionState
-    ? getDurationMinutesLabel(
-        copy.durationMinutesTemplate,
-        getModeDurationSeconds(completionState.nextMode, settings),
-      )
+    ? formatDurationLabel(getModeDurationSeconds(completionState.nextMode, settings), locale)
     : null;
   const completionTitle = completionState
     ? completionState.mode === "focus"

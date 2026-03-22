@@ -28,30 +28,44 @@ export function formatSeconds(totalSeconds: number) {
 }
 
 export function formatDurationLabel(totalSeconds: number, locale: AppLocale = "ko") {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const clamped = Math.max(totalSeconds, 0);
+  const hours = Math.floor(clamped / 3600);
+  const minutes = Math.floor((clamped % 3600) / 60);
+  const seconds = clamped % 60;
 
   if (locale === "en") {
-    if (hours > 0 && minutes > 0) {
-      return `${hours}h ${minutes}m`;
-    }
+    const parts: string[] = [];
 
     if (hours > 0) {
-      return `${hours}h`;
+      parts.push(`${hours}h`);
     }
 
-    return `${minutes}m`;
+    if (minutes > 0) {
+      parts.push(`${minutes}m`);
+    }
+
+    if (seconds > 0 || parts.length === 0) {
+      parts.push(`${seconds}s`);
+    }
+
+    return parts.join(" ");
   }
 
-  if (hours > 0 && minutes > 0) {
-    return `${hours}시간 ${minutes}분`;
-  }
+  const parts: string[] = [];
 
   if (hours > 0) {
-    return `${hours}시간`;
+    parts.push(`${hours}시간`);
   }
 
-  return `${minutes}분`;
+  if (minutes > 0) {
+    parts.push(`${minutes}분`);
+  }
+
+  if (seconds > 0 || parts.length === 0) {
+    parts.push(`${seconds}초`);
+  }
+
+  return parts.join(" ");
 }
 
 export function formatDateTime(

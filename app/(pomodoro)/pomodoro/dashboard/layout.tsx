@@ -84,6 +84,7 @@ export default async function DashboardLayout({
       initialDailyFocusStreak={initialDailyFocusStreak}
       initialFocusStreak={getFocusStreakSinceLongBreak(recentSessions)}
       initialTodayFocusCount={initialTodayFocusCount}
+      locale={locale}
       modeCopy={dictionary.modes}
       recentTags={recentTags}
       settings={settings}

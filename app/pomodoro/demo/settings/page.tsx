@@ -199,10 +199,10 @@ export default async function DemoSettingsPage() {
                   <Input
                     autoComplete="off"
                     id="demo-focus-minutes"
-                    inputMode="numeric"
-                    name="focus_minutes"
+                    inputMode="text"
+                    name="focus_duration_seconds"
                     readOnly
-                    type="number"
+                    type="text"
                     value="25"
                   />
                 </div>
@@ -211,10 +211,10 @@ export default async function DemoSettingsPage() {
                   <Input
                     autoComplete="off"
                     id="demo-short-break-minutes"
-                    inputMode="numeric"
-                    name="short_break_minutes"
+                    inputMode="text"
+                    name="short_break_duration_seconds"
                     readOnly
-                    type="number"
+                    type="text"
                     value="5"
                   />
                 </div>
@@ -223,10 +223,10 @@ export default async function DemoSettingsPage() {
                   <Input
                     autoComplete="off"
                     id="demo-long-break-minutes"
-                    inputMode="numeric"
-                    name="long_break_minutes"
+                    inputMode="text"
+                    name="long_break_duration_seconds"
                     readOnly
-                    type="number"
+                    type="text"
                     value="15"
                   />
                 </div>

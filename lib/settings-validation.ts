@@ -5,21 +5,21 @@ import { isSupportedTimeZone } from "@/lib/timezones";
 import type { PomodoroSettingsValues } from "@/types/settings";
 
 export const pomodoroSettingsSchema = z.object({
-  focus_minutes: z
+  focus_duration_seconds: z
     .number()
     .int()
-    .min(POMODORO_SETTINGS_LIMITS.focus_minutes.min)
-    .max(POMODORO_SETTINGS_LIMITS.focus_minutes.max),
-  short_break_minutes: z
+    .min(POMODORO_SETTINGS_LIMITS.focus_duration_seconds.min)
+    .max(POMODORO_SETTINGS_LIMITS.focus_duration_seconds.max),
+  short_break_duration_seconds: z
     .number()
     .int()
-    .min(POMODORO_SETTINGS_LIMITS.short_break_minutes.min)
-    .max(POMODORO_SETTINGS_LIMITS.short_break_minutes.max),
-  long_break_minutes: z
+    .min(POMODORO_SETTINGS_LIMITS.short_break_duration_seconds.min)
+    .max(POMODORO_SETTINGS_LIMITS.short_break_duration_seconds.max),
+  long_break_duration_seconds: z
     .number()
     .int()
-    .min(POMODORO_SETTINGS_LIMITS.long_break_minutes.min)
-    .max(POMODORO_SETTINGS_LIMITS.long_break_minutes.max),
+    .min(POMODORO_SETTINGS_LIMITS.long_break_duration_seconds.min)
+    .max(POMODORO_SETTINGS_LIMITS.long_break_duration_seconds.max),
   long_break_every: z
     .number()
     .int()

@@ -1,7 +1,7 @@
 export type PomodoroSettings = {
-  focus_minutes: number;
-  short_break_minutes: number;
-  long_break_minutes: number;
+  focus_duration_seconds: number;
+  short_break_duration_seconds: number;
+  long_break_duration_seconds: number;
   long_break_every: number;
   timezone: string;
   auto_advance: boolean;

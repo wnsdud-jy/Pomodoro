@@ -291,11 +291,12 @@ export async function upsertPomodoroSettings(
   const currentSettings = await getPomodoroSettings(supabase, userId);
   const updatePayload = {
     user_id: userId,
-    focus_minutes: payload.focus_minutes ?? currentSettings.focus_minutes,
-    short_break_minutes:
-      payload.short_break_minutes ?? currentSettings.short_break_minutes,
-    long_break_minutes:
-      payload.long_break_minutes ?? currentSettings.long_break_minutes,
+    focus_duration_seconds:
+      payload.focus_duration_seconds ?? currentSettings.focus_duration_seconds,
+    short_break_duration_seconds:
+      payload.short_break_duration_seconds ?? currentSettings.short_break_duration_seconds,
+    long_break_duration_seconds:
+      payload.long_break_duration_seconds ?? currentSettings.long_break_duration_seconds,
     long_break_every:
       payload.long_break_every ?? currentSettings.long_break_every,
     timezone: payload.timezone ?? currentSettings.timezone,

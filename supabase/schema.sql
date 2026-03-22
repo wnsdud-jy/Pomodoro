@@ -86,9 +86,9 @@ alter table public.app_preferences enable row level security;
 
 create table if not exists public.settings (
   user_id uuid primary key references auth.users (id) on delete cascade,
-  focus_minutes integer not null default 25 check (focus_minutes between 1 and 180),
-  short_break_minutes integer not null default 5 check (short_break_minutes between 1 and 60),
-  long_break_minutes integer not null default 15 check (long_break_minutes between 1 and 120),
+  focus_duration_seconds integer not null default 1500 check (focus_duration_seconds between 1 and 10800),
+  short_break_duration_seconds integer not null default 300 check (short_break_duration_seconds between 1 and 3600),
+  long_break_duration_seconds integer not null default 900 check (long_break_duration_seconds between 1 and 7200),
   long_break_every integer not null default 4 check (long_break_every between 1 and 12),
   timezone text not null default 'Asia/Seoul',
   auto_advance boolean not null default true,

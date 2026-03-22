@@ -39,9 +39,9 @@ export default async function SettingsPage() {
       <SettingsForm
         copy={dictionary.settingsPage.form}
         initialValues={{
-          focus_minutes: settings.focus_minutes,
-          short_break_minutes: settings.short_break_minutes,
-          long_break_minutes: settings.long_break_minutes,
+          focus_duration_seconds: settings.focus_duration_seconds,
+          short_break_duration_seconds: settings.short_break_duration_seconds,
+          long_break_duration_seconds: settings.long_break_duration_seconds,
           long_break_every: settings.long_break_every,
           timezone: settings.timezone,
           auto_advance: settings.auto_advance,

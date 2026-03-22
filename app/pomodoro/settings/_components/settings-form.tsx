@@ -18,6 +18,8 @@ import {
 import {
   DEFAULT_POMODORO_SETTINGS_VALUES,
   POMODORO_SETTINGS_LIMITS,
+  formatDurationInput,
+  parseDurationInput,
 } from "@/lib/pomodoro-settings";
 import { parsePomodoroSettingsInput } from "@/lib/settings-validation";
 import { APP_TIME_ZONES, formatTimeZoneOptionLabel } from "@/lib/timezones";
@@ -25,15 +27,15 @@ import type { AppDictionary } from "@/lib/i18n/messages";
 import type { PomodoroSettingsValues } from "@/types/settings";
 
 type NumericFieldKey =
-  | "focus_minutes"
-  | "short_break_minutes"
-  | "long_break_minutes"
+  | "focus_duration_seconds"
+  | "short_break_duration_seconds"
+  | "long_break_duration_seconds"
   | "long_break_every";
 
 type FormValues = {
-  focus_minutes: string;
-  short_break_minutes: string;
-  long_break_minutes: string;
+  focus_duration_seconds: string;
+  short_break_duration_seconds: string;
+  long_break_duration_seconds: string;
   long_break_every: string;
   timezone: string;
   auto_advance: boolean;
@@ -48,9 +50,9 @@ type FieldErrors = Partial<Record<FieldErrorKey, string>>;
 
 function buildFormValues(values: PomodoroSettingsValues): FormValues {
   return {
-    focus_minutes: String(values.focus_minutes),
-    short_break_minutes: String(values.short_break_minutes),
-    long_break_minutes: String(values.long_break_minutes),
+    focus_duration_seconds: formatDurationInput(values.focus_duration_seconds),
+    short_break_duration_seconds: formatDurationInput(values.short_break_duration_seconds),
+    long_break_duration_seconds: formatDurationInput(values.long_break_duration_seconds),
     long_break_every: String(values.long_break_every),
     timezone: values.timezone,
     auto_advance: values.auto_advance,
@@ -123,11 +125,11 @@ function getFieldErrorMessage(
   switch (key) {
     case "timezone":
       return copy.timeZoneError;
-    case "focus_minutes":
+    case "focus_duration_seconds":
       return copy.focusMinutesError;
-    case "short_break_minutes":
+    case "short_break_duration_seconds":
       return copy.shortBreakMinutesError;
-    case "long_break_minutes":
+    case "long_break_duration_seconds":
       return copy.longBreakMinutesError;
     default:
       return copy.longBreakEveryError;
@@ -178,9 +180,9 @@ export function SettingsForm({
   const currentSummary = useMemo(
     () => ({
       durations: copy.summaryDurationsTemplate
-        .replace("{focus}", values.focus_minutes)
-        .replace("{short}", values.short_break_minutes)
-        .replace("{long}", values.long_break_minutes),
+        .replace("{focus}", values.focus_duration_seconds)
+        .replace("{short}", values.short_break_duration_seconds)
+        .replace("{long}", values.long_break_duration_seconds),
       cadence: copy.summaryCadenceTemplate.replace(
         "{count}",
         values.long_break_every,
@@ -198,16 +200,28 @@ export function SettingsForm({
     }),
     [copy, values],
   );
-  const isDirty = useMemo(
-    () => JSON.stringify(parsePayload(values)) !== JSON.stringify(parsePayload(savedValues)),
-    [savedValues, values],
-  );
+  const isDirty = useMemo(() => JSON.stringify(values) !== JSON.stringify(savedValues), [savedValues, values]);
 
   function parsePayload(currentValues: FormValues) {
+    const focusDuration = parseDurationInput(
+      currentValues.focus_duration_seconds,
+      "focus_duration_seconds",
+    );
+    const shortBreakDuration = parseDurationInput(
+      currentValues.short_break_duration_seconds,
+      "short_break_duration_seconds",
+    );
+    const longBreakDuration = parseDurationInput(
+      currentValues.long_break_duration_seconds,
+      "long_break_duration_seconds",
+    );
+
     return {
-      focus_minutes: Number(currentValues.focus_minutes),
-      short_break_minutes: Number(currentValues.short_break_minutes),
-      long_break_minutes: Number(currentValues.long_break_minutes),
+      focus_duration_seconds: focusDuration.success ? focusDuration.seconds : Number.NaN,
+      short_break_duration_seconds:
+        shortBreakDuration.success ? shortBreakDuration.seconds : Number.NaN,
+      long_break_duration_seconds:
+        longBreakDuration.success ? longBreakDuration.seconds : Number.NaN,
       long_break_every: Number(currentValues.long_break_every),
       timezone: currentValues.timezone,
       auto_advance: currentValues.auto_advance,
@@ -231,9 +245,9 @@ export function SettingsForm({
 
       if (
         key === "timezone" ||
-        key === "focus_minutes" ||
-        key === "short_break_minutes" ||
-        key === "long_break_minutes" ||
+        key === "focus_duration_seconds" ||
+        key === "short_break_duration_seconds" ||
+        key === "long_break_duration_seconds" ||
         key === "long_break_every"
       ) {
         nextErrors[key] = getFieldErrorMessage(key, copy);
@@ -399,69 +413,66 @@ export function SettingsForm({
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="focus_minutes">{copy.focusMinutesLabel}</Label>
+            <Label htmlFor="focus_duration_seconds">{copy.focusMinutesLabel}</Label>
             <Input
-              aria-invalid={fieldErrors.focus_minutes ? true : undefined}
+              aria-invalid={fieldErrors.focus_duration_seconds ? true : undefined}
               autoComplete="off"
-              id="focus_minutes"
-              inputMode="numeric"
-              max={POMODORO_SETTINGS_LIMITS.focus_minutes.max}
-              min={POMODORO_SETTINGS_LIMITS.focus_minutes.min}
-              name="focus_minutes"
-              onChange={(event) => updateNumberField("focus_minutes", event.target.value)}
+              id="focus_duration_seconds"
+              inputMode="text"
+              name="focus_duration_seconds"
+              onChange={(event) => updateNumberField("focus_duration_seconds", event.target.value)}
+              placeholder={copy.durationInputPlaceholder}
               required
-              type="number"
-              value={values.focus_minutes}
+              type="text"
+              value={values.focus_duration_seconds}
             />
-            {fieldErrors.focus_minutes ? (
+            {fieldErrors.focus_duration_seconds ? (
               <p className="text-sm text-rose-600 dark:text-rose-300">
-                {fieldErrors.focus_minutes}
+                {fieldErrors.focus_duration_seconds}
               </p>
             ) : null}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="short_break_minutes">{copy.shortBreakMinutesLabel}</Label>
+            <Label htmlFor="short_break_duration_seconds">{copy.shortBreakMinutesLabel}</Label>
             <Input
-              aria-invalid={fieldErrors.short_break_minutes ? true : undefined}
+              aria-invalid={fieldErrors.short_break_duration_seconds ? true : undefined}
               autoComplete="off"
-              id="short_break_minutes"
-              inputMode="numeric"
-              max={POMODORO_SETTINGS_LIMITS.short_break_minutes.max}
-              min={POMODORO_SETTINGS_LIMITS.short_break_minutes.min}
-              name="short_break_minutes"
+              id="short_break_duration_seconds"
+              inputMode="text"
+              name="short_break_duration_seconds"
               onChange={(event) =>
-                updateNumberField("short_break_minutes", event.target.value)
+                updateNumberField("short_break_duration_seconds", event.target.value)
               }
+              placeholder={copy.durationInputPlaceholder}
               required
-              type="number"
-              value={values.short_break_minutes}
+              type="text"
+              value={values.short_break_duration_seconds}
             />
-            {fieldErrors.short_break_minutes ? (
+            {fieldErrors.short_break_duration_seconds ? (
               <p className="text-sm text-rose-600 dark:text-rose-300">
-                {fieldErrors.short_break_minutes}
+                {fieldErrors.short_break_duration_seconds}
               </p>
             ) : null}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="long_break_minutes">{copy.longBreakMinutesLabel}</Label>
+            <Label htmlFor="long_break_duration_seconds">{copy.longBreakMinutesLabel}</Label>
             <Input
-              aria-invalid={fieldErrors.long_break_minutes ? true : undefined}
+              aria-invalid={fieldErrors.long_break_duration_seconds ? true : undefined}
               autoComplete="off"
-              id="long_break_minutes"
-              inputMode="numeric"
-              max={POMODORO_SETTINGS_LIMITS.long_break_minutes.max}
-              min={POMODORO_SETTINGS_LIMITS.long_break_minutes.min}
-              name="long_break_minutes"
+              id="long_break_duration_seconds"
+              inputMode="text"
+              name="long_break_duration_seconds"
               onChange={(event) =>
-                updateNumberField("long_break_minutes", event.target.value)
+                updateNumberField("long_break_duration_seconds", event.target.value)
               }
+              placeholder={copy.durationInputPlaceholder}
               required
-              type="number"
-              value={values.long_break_minutes}
+              type="text"
+              value={values.long_break_duration_seconds}
             />
-            {fieldErrors.long_break_minutes ? (
+            {fieldErrors.long_break_duration_seconds ? (
               <p className="text-sm text-rose-600 dark:text-rose-300">
-                {fieldErrors.long_break_minutes}
+                {fieldErrors.long_break_duration_seconds}
               </p>
             ) : null}
           </div>

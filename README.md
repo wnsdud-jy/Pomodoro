@@ -1,5 +1,12 @@
 # Pomodoro
 
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20Postgres-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 Pomodoro is a Pomodoro timer built with Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, and Supabase. It is designed for a single authenticated owner today, while the database layer is now user-scoped and ready for RLS-based access control.
 
 ## Overview
@@ -177,6 +184,10 @@ supabase/
 - `npm run build` - run the production build
 - `npm run start` - start the production server
 - `npm run lint` - run ESLint
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for details.
 
 ## Validation
 

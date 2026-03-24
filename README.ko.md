@@ -1,5 +1,12 @@
 # Pomodoro
 
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20Postgres-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 Pomodoro는 뽀모도로 타이머 앱입니다. Next.js, React, TypeScript, Tailwind CSS, shadcn/ui, Supabase를 기반으로 만들었고, 현재는 한 명의 인증된 사용자가 사용하는 흐름에 맞춰져 있습니다. 다만 데이터베이스 구조는 이미 `user_id` 기준으로 정리되어 있어서 RLS 기반 사용자 격리 구조를 그대로 확장할 수 있습니다.
 
 ## 개요
@@ -177,6 +184,10 @@ supabase/
 - `npm run build` - 프로덕션 빌드 실행
 - `npm run start` - 프로덕션 서버 실행
 - `npm run lint` - ESLint 실행
+
+## 라이선스
+
+이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 `LICENSE` 파일을 확인하세요.
 
 ## 검증
 

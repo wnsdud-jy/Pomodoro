@@ -109,7 +109,7 @@ npm run dev
 
 Open:
 
-- `http://localhost:3000/` -> redirects to `/pomodoro/login`
+- `http://localhost:3000/` -> shows 404 page
 - `http://localhost:3000/pomodoro/login`
 
 ## Route Map

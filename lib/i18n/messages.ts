@@ -81,6 +81,7 @@ export const dictionaries = {
         focusScreenDescription:
           "잡음을 줄이고, 현재 세션과 다음 흐름만 보면서 타이머에 집중합니다.",
         focusScreenHint: "Esc를 눌러 대시보드로 돌아갈 수 있습니다.",
+        currentTimeLabel: "현재 시각",
         completionBadge: "세션 완료",
         completionMessage: "{mode} 세션이 완료되었습니다.",
         completionModalTitle: "타이머가 종료되었습니다.",
@@ -451,6 +452,7 @@ export const dictionaries = {
         focusScreenDescription:
           "Strip the dashboard back to the live session, the next step, and the controls you need right now.",
         focusScreenHint: "Press Escape to return to the dashboard.",
+        currentTimeLabel: "Current time",
         completionBadge: "Session done",
         completionMessage: "{mode} session completed.",
         completionModalTitle: "Your timer has finished.",

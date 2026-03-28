@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Pause, Play, RotateCcw, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -57,6 +57,35 @@ export function FocusTimerScreen() {
     statusLabel,
     tag,
   } = useDashboardTimer();
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    const initializeTimer = window.setTimeout(() => {
+      setCurrentTime(new Date());
+    }, 0);
+
+    const interval = window.setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(initializeTimer);
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  const currentTimeText = useMemo(() => {
+    if (!currentTime) {
+      return "--:--:--";
+    }
+
+    return new Intl.DateTimeFormat(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(currentTime);
+  }, [currentTime]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -159,6 +188,13 @@ export function FocusTimerScreen() {
 
           <div className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm font-semibold text-slate-200 backdrop-blur">
             {statusLabel}
+          </div>
+
+          <div className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/6 px-4 py-2 font-mono text-sm text-slate-200 tabular-nums backdrop-blur">
+            <span className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
+              {copy.currentTimeLabel}
+            </span>
+            <span>{currentTimeText}</span>
           </div>
 
           <p className="max-w-3xl text-balance text-lg leading-7 text-slate-300 md:text-xl">

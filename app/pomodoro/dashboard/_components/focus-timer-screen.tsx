@@ -57,19 +57,28 @@ export function FocusTimerScreen() {
     statusLabel,
     tag,
   } = useDashboardTimer();
-  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    const initializeTimer = window.setTimeout(() => {
+      setCurrentTime(new Date());
+    }, 0);
+
     const interval = window.setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
     return () => {
+      window.clearTimeout(initializeTimer);
       window.clearInterval(interval);
     };
   }, []);
 
   const currentTimeText = useMemo(() => {
+    if (!currentTime) {
+      return "--:--:--";
+    }
+
     return new Intl.DateTimeFormat(undefined, {
       hour: "2-digit",
       minute: "2-digit",
